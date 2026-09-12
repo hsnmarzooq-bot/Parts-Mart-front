@@ -11,6 +11,8 @@ const API_BASE = "https://parts-mart-backend-production.up.railway.app/api"; // 
 const T = {
   ar: {
     appName: "Parts Mart", customerTab: "العميل", adminTab: "الإدارة",
+    adminLoginTitle: "تسجيل دخول الإدارة", username: "اسم المستخدم", password: "كلمة المرور",
+    loginBtn: "دخول", loginError: "اسم المستخدم أو كلمة المرور غير صحيحة", loginFillFields: "الرجاء تعبئة الحقلين",
     navHome: "الرئيسية", navSearch: "بحث", navCart: "السلة", navOrders: "طلباتي",
     welcome: (n) => `أهلاً ${n}`, heroTitle: "ابحث عن أي قطعة غيار",
     heroSubtitle: "أدخل نوع سيارتك وموديلها لنعرض لك أفضل الأسعار من موردين موثوقين",
@@ -61,6 +63,8 @@ const T = {
   },
   en: {
     appName: "Parts Mart", customerTab: "Customer", adminTab: "Admin",
+    adminLoginTitle: "Admin Login", username: "Username", password: "Password",
+    loginBtn: "Log in", loginError: "Incorrect username or password", loginFillFields: "Please fill in both fields",
     navHome: "Home", navSearch: "Search", navCart: "Cart", navOrders: "Orders",
     welcome: (n) => `Welcome ${n}`, heroTitle: "Find any spare part",
     heroSubtitle: "Enter your car's make and model to see the best prices from trusted suppliers",
@@ -194,6 +198,7 @@ export default function App() {
   const [lang, setLang] = useState("ar");
   const [currency, setCurrency] = useState("SAR");
   const [role, setRole] = useState("customer");
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [screen, setScreen] = useState("home");
   const [customers, setCustomers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -472,7 +477,7 @@ export default function App() {
                   <OrdersScreen t={t} lang={lang} currency={currency} orders={orders} />
                 )}
               </>
-            ) : (
+            ) : adminAuthenticated ? (
               <AdminDashboard
                 t={t} lang={lang} currency={currency}
                 screen={screen} setScreen={setScreen}
@@ -483,6 +488,8 @@ export default function App() {
                 onAddSupplier={addSupplier} supplierError={supplierError}
                 partRequests={partRequests} onMarkFulfilled={markRequestFulfilled}
               />
+            ) : (
+              <AdminLogin t={t} onSuccess={() => { setAdminAuthenticated(true); setScreen("overview"); }} />
             )}
           </div>
 
@@ -955,6 +962,56 @@ function StatusTracker({ t, stage }) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function AdminLogin({ t, onSuccess }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  function handleSubmit() {
+    if (!username.trim() || !password.trim()) {
+      setError(t.loginFillFields);
+      return;
+    }
+    // Demo-only check — replace with a real server-side login endpoint before launch.
+    if (username === "admin" && password === "admin123") {
+      setError("");
+      onSuccess();
+    } else {
+      setError(t.loginError);
+    }
+  }
+
+  return (
+    <div className="p-6 max-w-xs mx-auto space-y-4">
+      <h2 className="text-base font-medium text-center">{t.adminLoginTitle}</h2>
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.username}</label>
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.password}</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        {error && <p className="text-xs text-red-600">{error}</p>}
+        <button onClick={handleSubmit} className="w-full bg-slate-900 text-white text-sm py-2.5 rounded-lg font-medium">
+          {t.loginBtn}
+        </button>
+      </div>
     </div>
   );
 }
