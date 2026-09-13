@@ -284,6 +284,8 @@ export default function App() {
           fetch(`${API_BASE}/part-requests`),
           fetch(`${API_BASE}/supplier-requests`),
         ]);
+        const responses = [partsRes, suppliersRes, ordersRes, customersRes, requestsRes, supplierReqRes];
+        if (responses.some((r) => !r.ok)) throw new Error("one or more endpoints returned an error");
         setParts(await partsRes.json());
         setSuppliers(await suppliersRes.json());
         setOrders(await ordersRes.json());
@@ -310,8 +312,8 @@ export default function App() {
     const timeout = setTimeout(() => {
       const params = new URLSearchParams({ ...search, lang });
       fetch(`${API_BASE}/parts?${params.toString()}`)
-        .then((r) => r.json())
-        .then(setSearchResults)
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error("search failed"))))
+        .then((data) => setSearchResults(Array.isArray(data) ? data : []))
         .catch(() => setApiError(t.apiOffline));
     }, 300);
     return () => clearTimeout(timeout);
