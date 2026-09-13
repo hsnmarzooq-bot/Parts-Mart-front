@@ -29,7 +29,12 @@ const T = {
     startSearch: "ابدأ البحث", registerBanner: "سجّل حسابك لمتابعة طلباتك",
     statSuppliers: "مورد قطع غيار", statHidden: "هوية مخفية", statHiddenSub: "حماية بيانات الموردين",
     registerTitle: "تسجيل حساب جديد", fullName: "الاسم الكامل", namePh: "مثال: أحمد السالم",
-    phone: "رقم الجوال", phonePh: "05xxxxxxxx", fillFields: "الرجاء تعبئة الاسم ورقم الجوال",
+    phone: "رقم الجوال", phonePh: "05xxxxxxxx", fillFields: "الرجاء تعبئة كل الحقول",
+    loginTitle: "تسجيل الدخول", emailLabel: "البريد الإلكتروني", usernameTaken: "اسم المستخدم هذا محجوز، اختر اسمًا آخر",
+    noAccountYet: "ليس لديك حساب؟", createAccountLink: "سجّل الآن", haveAccountAlready: "لديك حساب بالفعل؟", loginLink: "سجّل الدخول", logoutBtn: "تسجيل الخروج",
+    emailNotVerified: "لم يتم تأكيد بريدك الإلكتروني بعد", resendVerification: "إعادة إرسال رسالة التأكيد",
+    verificationResent: "أُعيد إرسال رسالة التأكيد إلى بريدك",
+    checkEmailTitle: "تحقق من بريدك الإلكتروني", checkEmailBody: (e) => `أرسلنا رابط تأكيد إلى ${e}. اضغط الرابط لتفعيل حسابك ثم سجّل الدخول.`,
     createAccount: "إنشاء الحساب",
     searchPh: "اسم القطعة أو الموديل", allMakes: "الكل", noResults: "لا توجد نتائج مطابقة",
     listening: "جارِ الاستماع... تحدث الآن", micUnsupported: "المتصفح الحالي لا يدعم البحث الصوتي",
@@ -99,7 +104,12 @@ const T = {
     startSearch: "Start searching", registerBanner: "Sign up to track your orders",
     statSuppliers: "spare part suppliers", statHidden: "Identity hidden", statHiddenSub: "Supplier data is protected",
     registerTitle: "Create a new account", fullName: "Full name", namePh: "e.g. Ahmed Al-Salem",
-    phone: "Mobile number", phonePh: "05xxxxxxxx", fillFields: "Please fill in your name and mobile number",
+    phone: "Mobile number", phonePh: "05xxxxxxxx", fillFields: "Please fill in all fields",
+    loginTitle: "Log In", emailLabel: "Email", usernameTaken: "This username is taken, choose another one",
+    noAccountYet: "Don't have an account?", createAccountLink: "Sign up", haveAccountAlready: "Already have an account?", loginLink: "Log in", logoutBtn: "Log out",
+    emailNotVerified: "Your email hasn't been verified yet", resendVerification: "Resend confirmation email",
+    verificationResent: "Confirmation email resent",
+    checkEmailTitle: "Check your email", checkEmailBody: (e) => `We sent a confirmation link to ${e}. Click it to activate your account, then log in.`,
     createAccount: "Create account",
     searchPh: "Part name or model", allMakes: "All", noResults: "No matching results",
     listening: "Listening... speak now", micUnsupported: "This browser doesn't support voice search",
@@ -252,8 +262,11 @@ export default function App() {
   const [vin, setVin] = useState("");
   const [vinInfo, setVinInfo] = useState(null);
   const [partRequests, setPartRequests] = useState([]);
-  const [regForm, setRegForm] = useState({ name: "", phone: "" });
+  const [regForm, setRegForm] = useState({ username: "", password: "", name: "", phone: "", email: "" });
   const [regError, setRegError] = useState("");
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const [newPart, setNewPart] = useState({ name: "", make: "", model: "", year: "", price: "", sku: "", aliases: "", supplierId: "", image: null });
   const [apiError, setApiError] = useState("");
 
@@ -332,7 +345,8 @@ export default function App() {
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
 
   async function submitRegistration() {
-    if (!regForm.name.trim() || !regForm.phone.trim()) {
+    const { username, password, name, phone, email } = regForm;
+    if (!username.trim() || !password.trim() || !name.trim() || !phone.trim() || !email.trim()) {
       setRegError(t.fillFields);
       return;
     }
@@ -340,15 +354,61 @@ export default function App() {
       const res = await fetch(`${API_BASE}/customers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: regForm.name, phone: regForm.phone }),
+        body: JSON.stringify({ username, password, name, phone, email }),
       });
+      if (res.status === 409) {
+        setRegError(t.usernameTaken);
+        return;
+      }
+      if (!res.ok) throw new Error("register failed");
       const user = await res.json();
       setCustomers((prev) => [...prev, user]);
-      setCurrentUser(user);
       setRegError("");
-      setScreen("home");
+      setRegisteredEmail(email);
+      setScreen("checkEmail");
     } catch (e) {
       setRegError(t.apiOffline);
+    }
+  }
+
+  async function submitLogin() {
+    if (!loginForm.username.trim() || !loginForm.password.trim()) {
+      setLoginError(t.loginFillFields);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/customers/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginForm),
+      });
+      if (res.status === 403) {
+        setLoginError(t.emailNotVerified);
+        return;
+      }
+      if (!res.ok) {
+        setLoginError(t.loginError);
+        return;
+      }
+      const user = await res.json();
+      setCurrentUser(user);
+      setLoginError("");
+      setScreen("home");
+    } catch (e) {
+      setLoginError(t.apiOffline);
+    }
+  }
+
+  async function resendVerification() {
+    try {
+      await fetch(`${API_BASE}/customers/resend-verification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: loginForm.username }),
+      });
+      setLoginError(t.verificationResent);
+    } catch (e) {
+      setLoginError(t.apiOffline);
     }
   }
 
@@ -547,10 +607,16 @@ export default function App() {
             {role === "customer" ? (
               <>
                 {screen === "home" && (
-                  <Home t={t} lang={lang} currentUser={currentUser} onSearch={() => setScreen("search")} onRegister={() => setScreen("register")} />
+                  <Home t={t} lang={lang} currentUser={currentUser} onSearch={() => setScreen("search")} onRegister={() => setScreen("login")} onLogout={() => setCurrentUser(null)} />
+                )}
+                {screen === "login" && (
+                  <Login t={t} loginForm={loginForm} setLoginForm={setLoginForm} error={loginError} onSubmit={submitLogin} onGoToRegister={() => setScreen("register")} onResend={resendVerification} />
+                )}
+                {screen === "checkEmail" && (
+                  <CheckEmail t={t} email={registeredEmail} onBackToLogin={() => setScreen("login")} />
                 )}
                 {screen === "register" && (
-                  <Register t={t} regForm={regForm} setRegForm={setRegForm} error={regError} onSubmit={submitRegistration} />
+                  <Register t={t} regForm={regForm} setRegForm={setRegForm} error={regError} onSubmit={submitRegistration} onGoToLogin={() => setScreen("login")} />
                 )}
                 {screen === "search" && (
                   <SearchScreen
@@ -570,7 +636,7 @@ export default function App() {
                     t={t} lang={lang} currency={currency}
                     cart={cart} total={cartTotal} onQty={updateQty} onRemove={removeFromCart}
                     onCheckout={placeOrder} onBrowse={() => setScreen("search")} currentUser={currentUser}
-                    onNeedsRegister={() => setScreen("register")}
+                    onNeedsRegister={() => setScreen("login")}
                     vin={vin} vinInfo={vinInfo}
                   />
                 )}
@@ -724,7 +790,7 @@ function SidebarNav({ t, lang, screen, setScreen, cartCount }) {
   );
 }
 
-function Home({ t, lang, currentUser, onSearch, onRegister }) {
+function Home({ t, lang, currentUser, onSearch, onRegister, onLogout }) {
   return (
     <div className="p-5 space-y-5">
       <div className="bg-slate-900 rounded-xl p-5 text-white">
@@ -737,10 +803,14 @@ function Home({ t, lang, currentUser, onSearch, onRegister }) {
         </button>
       </div>
 
-      {!currentUser && (
+      {!currentUser ? (
         <button onClick={onRegister} className="w-full border border-slate-300 rounded-xl p-4 flex items-center justify-between text-sm">
           <span>{t.registerBanner}</span>
           <ChevronLeft size={18} className="text-slate-400" />
+        </button>
+      ) : (
+        <button onClick={onLogout} className="w-full text-center text-xs text-slate-400">
+          {t.logoutBtn}
         </button>
       )}
 
@@ -758,11 +828,85 @@ function Home({ t, lang, currentUser, onSearch, onRegister }) {
   );
 }
 
-function Register({ t, regForm, setRegForm, error, onSubmit }) {
+function Login({ t, loginForm, setLoginForm, error, onSubmit, onGoToRegister, onResend }) {
+  return (
+    <div className="p-5 space-y-4">
+      <h2 className="text-base font-medium">{t.loginTitle}</h2>
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.username}</label>
+          <input
+            value={loginForm.username}
+            onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.password}</label>
+          <input
+            type="password"
+            value={loginForm.password}
+            onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && onSubmit()}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        {error && (
+          <div>
+            <p className="text-xs text-red-600">{error}</p>
+            {error === t.emailNotVerified && (
+              <button onClick={onResend} className="text-xs text-amber-600 mt-1">{t.resendVerification}</button>
+            )}
+          </div>
+        )}
+        <button onClick={onSubmit} className="w-full bg-amber-500 text-slate-900 text-sm py-2.5 rounded-lg font-medium">
+          {t.loginBtn}
+        </button>
+        <button onClick={onGoToRegister} className="w-full text-center text-xs text-slate-500 pt-1">
+          {t.noAccountYet} <span className="text-amber-600">{t.createAccountLink}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CheckEmail({ t, email, onBackToLogin }) {
+  return (
+    <div className="p-6 max-w-xs mx-auto text-center space-y-4">
+      <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto">
+        <Bell size={24} className="text-amber-600" />
+      </div>
+      <h2 className="text-base font-medium">{t.checkEmailTitle}</h2>
+      <p className="text-sm text-slate-500">{t.checkEmailBody(email)}</p>
+      <button onClick={onBackToLogin} className="w-full bg-slate-900 text-white text-sm py-2.5 rounded-lg font-medium">
+        {t.loginLink}
+      </button>
+    </div>
+  );
+}
+
+function Register({ t, regForm, setRegForm, error, onSubmit, onGoToLogin }) {
   return (
     <div className="p-5 space-y-4">
       <h2 className="text-base font-medium">{t.registerTitle}</h2>
       <div className="space-y-3">
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.username}</label>
+          <input
+            value={regForm.username}
+            onChange={(e) => setRegForm({ ...regForm, username: e.target.value })}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.password}</label>
+          <input
+            type="password"
+            value={regForm.password}
+            onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
         <div>
           <label className="text-xs text-slate-500 block mb-1">{t.fullName}</label>
           <input
@@ -781,9 +925,21 @@ function Register({ t, regForm, setRegForm, error, onSubmit }) {
             placeholder={t.phonePh}
           />
         </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.emailLabel}</label>
+          <input
+            type="email"
+            value={regForm.email}
+            onChange={(e) => setRegForm({ ...regForm, email: e.target.value })}
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
         {error && <p className="text-xs text-red-600">{error}</p>}
         <button onClick={onSubmit} className="w-full bg-amber-500 text-slate-900 text-sm py-2.5 rounded-lg font-medium">
           {t.createAccount}
+        </button>
+        <button onClick={onGoToLogin} className="w-full text-center text-xs text-slate-500 pt-1">
+          {t.haveAccountAlready} <span className="text-amber-600">{t.loginLink}</span>
         </button>
       </div>
     </div>
