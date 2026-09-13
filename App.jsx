@@ -624,22 +624,22 @@ function TopBar({ t, lang, setLang, currency, setCurrency, role, setRole, setScr
           <Package size={20} />
           <span className="text-base font-medium">{t.appName}</span>
         </div>
-        <div className={`flex rounded-lg overflow-hidden border border-slate-600 ${isDesktop ? "w-full" : ""}`}>
+        <div className="flex rounded-lg overflow-hidden border border-slate-600 w-full">
           <button
             onClick={() => { setRole("customer"); setScreen("home"); }}
-            className={`px-3 py-1.5 text-sm ${isDesktop ? "flex-1" : ""} ${role === "customer" ? "bg-amber-500 text-slate-900" : "text-slate-300"}`}
+            className={`flex-1 px-2 py-1.5 text-xs sm:text-sm text-center ${role === "customer" ? "bg-amber-500 text-slate-900" : "text-slate-300"}`}
           >
             {t.customerTab}
           </button>
           <button
             onClick={() => { setRole("supplier"); setScreen("myProfile"); }}
-            className={`px-3 py-1.5 text-sm ${isDesktop ? "flex-1" : ""} ${role === "supplier" ? "bg-amber-500 text-slate-900" : "text-slate-300"}`}
+            className={`flex-1 px-2 py-1.5 text-xs sm:text-sm text-center ${role === "supplier" ? "bg-amber-500 text-slate-900" : "text-slate-300"}`}
           >
             {t.supplierTab}
           </button>
           <button
             onClick={() => { setRole("admin"); setScreen("overview"); }}
-            className={`px-3 py-1.5 text-sm ${isDesktop ? "flex-1" : ""} ${role === "admin" ? "bg-amber-500 text-slate-900" : "text-slate-300"}`}
+            className={`flex-1 px-2 py-1.5 text-xs sm:text-sm text-center ${role === "admin" ? "bg-amber-500 text-slate-900" : "text-slate-300"}`}
           >
             {t.adminTab}
           </button>
