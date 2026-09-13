@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Search, ShoppingCart, Package, User, LayoutDashboard, Plus, Minus,
   Trash2, Check, Truck, Clock, ChevronRight, ChevronLeft, Store, Users,
-  ClipboardList, Wallet, Globe, Coins, Mic, Bell, Camera
+  ClipboardList, Wallet, Globe, Coins, Mic, Bell, Camera, X
 } from "lucide-react";
 
 const BHD_PER_SAR = 0.0997; // approximate peg-based rate, base prices are stored in SAR
@@ -78,7 +78,7 @@ const T = {
     noSelfRegNote: "لا يوجد تسجيل ذاتي للموردين — الإدارة فقط من تُنشئ الحسابات وتمنحهم بيانات الدخول.",
     shopName: "اسم المحل", city: "المدينة", contactNumber: "رقم التواصل", fillShopFields: "الرجاء تعبئة اسم المحل ورقم التواصل",
     createAccountBtn: "إنشاء الحساب", hiddenIdentityNote: "هوية الموردين مرئية هنا فقط، ولا تظهر أبداً لواجهة العميل.",
-    noCustomers: "لا يوجد عملاء مسجّلون بعد",
+    noCustomers: "لا يوجد عملاء مسجّلون بعد", customerDetailsTitle: "بيانات العميل",
     language: "اللغة", currency: "العملة", arabic: "عربي", english: "English",
     sar: "ريال سعودي", bhd: "دينار بحريني",
     apiOffline: "تعذّر الاتصال بالخادم. تأكد أن الخادم يعمل محلياً (node server.js) على المنفذ 3001.",
@@ -153,7 +153,7 @@ const T = {
     noSelfRegNote: "There is no supplier self-registration — only Admin can create accounts and issue login details.",
     shopName: "Shop name", city: "City", contactNumber: "Contact number", fillShopFields: "Please fill in the shop name and contact number",
     createAccountBtn: "Create account", hiddenIdentityNote: "Supplier identity is only visible here, and is never shown on the customer app.",
-    noCustomers: "No customers registered yet",
+    noCustomers: "No customers registered yet", customerDetailsTitle: "Customer Details",
     language: "Language", currency: "Currency", arabic: "عربي", english: "English",
     sar: "Saudi Riyal", bhd: "Bahraini Dinar",
     apiOffline: "Couldn't reach the server. Make sure the backend is running locally (node server.js) on port 3001.",
@@ -1696,6 +1696,7 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
   const activeTab = ["overview", "orders", "parts", "requests", "supplierRequests", "suppliers", "customers"].includes(screen) ? screen : "overview";
   const totalCommission = orders.reduce((s, o) => s + o.commission, 0);
   const totalSales = orders.reduce((s, o) => s + o.total, 0);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   return (
     <div>
@@ -1903,14 +1904,35 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
           <div className="space-y-2">
             {customers.length === 0 && <p className="text-sm text-slate-400 text-center py-8">{t.noCustomers}</p>}
             {customers.map((c) => (
-              <div key={c.id} className="border border-slate-200 rounded-xl p-3 flex justify-between items-center text-sm">
+              <button
+                key={c.id}
+                onClick={() => setSelectedCustomer(c)}
+                className="w-full border border-slate-200 rounded-xl p-3 flex justify-between items-center text-sm text-start hover:border-amber-300"
+              >
                 <span>{c.name}</span>
                 <span className="text-xs text-slate-400">{c.phone}</span>
-              </div>
+              </button>
             ))}
           </div>
         )}
       </div>
+
+      {selectedCustomer && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50" onClick={() => setSelectedCustomer(null)}>
+          <div className="bg-white rounded-xl p-5 w-full max-w-xs space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-medium">{t.customerDetailsTitle}</h3>
+              <button onClick={() => setSelectedCustomer(null)}><X size={18} className="text-slate-400" /></button>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between"><span className="text-slate-500">{t.fullName}</span><span>{selectedCustomer.name}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">{t.username}</span><span>{selectedCustomer.username}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">{t.phone}</span><span>{selectedCustomer.phone}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">{t.emailLabel}</span><span>{selectedCustomer.email}</span></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
