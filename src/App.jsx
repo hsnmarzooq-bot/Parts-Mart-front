@@ -363,9 +363,9 @@ export default function App() {
       if (!res.ok) throw new Error("register failed");
       const user = await res.json();
       setCustomers((prev) => [...prev, user]);
+      setCurrentUser(user);
       setRegError("");
-      setRegisteredEmail(email);
-      setScreen("checkEmail");
+      setScreen("home");
     } catch (e) {
       setRegError(t.apiOffline);
     }
