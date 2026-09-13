@@ -447,7 +447,7 @@ export default function App() {
       const res = await fetch(`${API_BASE}/supplier-requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ supplierId: currentSupplier.id, supplierName: currentSupplier.name, type, payload }),
+        body: JSON.stringify({ supplierId: currentSupplier.id, supplierName: L(currentSupplier.name, lang), type, payload }),
       });
       const request = await res.json();
       setSupplierRequests((prev) => [request, ...prev]);
@@ -1481,7 +1481,7 @@ function AdminLogin({ t, onSuccess }) {
   );
 }
 
-function SupplierRequestsReview({ t, requests, onReview }) {
+function SupplierRequestsReview({ t, lang, requests, onReview }) {
   const [notes, setNotes] = useState({});
 
   function renderPayload(r) {
@@ -1498,7 +1498,7 @@ function SupplierRequestsReview({ t, requests, onReview }) {
       {requests.map((r) => (
         <div key={r.id} className="border border-slate-200 rounded-xl p-3 space-y-2 text-sm">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-medium">{r.supplierName}</span>
+            <span className="text-xs font-medium">{L(r.supplierName, lang)}</span>
             <RequestStatusBadge t={t} status={r.status} />
           </div>
           <div className="text-xs text-slate-500">{r.type === "profile_update" ? t.requestTypeProfile : t.requestTypeNewPart}</div>
@@ -1705,7 +1705,7 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
         )}
 
         {activeTab === "supplierRequests" && (
-          <SupplierRequestsReview t={t} requests={supplierRequests} onReview={onReviewSupplierRequest} />
+          <SupplierRequestsReview t={t} lang={lang} requests={supplierRequests} onReview={onReviewSupplierRequest} />
         )}
 
         {activeTab === "suppliers" && (
