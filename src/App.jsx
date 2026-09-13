@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 const BHD_PER_SAR = 0.0997; // approximate peg-based rate, base prices are stored in SAR
-const API_BASE = "https://parts-mart-backend-production.up.railway.app/api"; // deployed backend on Railway
+const API_BASE = "https://parts-mart-backend-production-cac5.up.railway.app/api"; // deployed backend on Railway
 
 const T = {
   ar: {
