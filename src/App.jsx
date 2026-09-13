@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Search, ShoppingCart, Package, User, LayoutDashboard, Plus, Minus,
   Trash2, Check, Truck, Clock, ChevronRight, ChevronLeft, Store, Users,
-  ClipboardList, Wallet, Globe, Coins, Mic, Bell
+  ClipboardList, Wallet, Globe, Coins, Mic, Bell, Camera
 } from "lucide-react";
 
 const BHD_PER_SAR = 0.0997; // approximate peg-based rate, base prices are stored in SAR
@@ -23,10 +23,17 @@ const T = {
     createAccount: "إنشاء الحساب",
     searchPh: "اسم القطعة أو الموديل", allMakes: "الكل", noResults: "لا توجد نتائج مطابقة",
     listening: "جارِ الاستماع... تحدث الآن", micUnsupported: "المتصفح الحالي لا يدعم البحث الصوتي",
+    micPermissionDenied: "الرجاء السماح بالوصول للمايك من إعدادات المتصفح ثم أعد المحاولة",
+    micNoSpeech: "لم يُسمَع أي صوت، حاول التحدث مرة أخرى", micGenericError: "حدث خطأ أثناء البحث الصوتي، حاول مرة أخرى",
     heardPrefix: (s) => `سمعت: "${s}"`,
     searchCarMake: "نوع السيارة", searchCarModel: "موديل السيارة", searchYear: "سنة الصنع",
     searchPartNumber: "رقم القطعة", searchPartName: "اسم القطعة", voiceSearchAll: "ابحث بالصوت في كل الخانات دفعة واحدة",
     aiAnalyzing: "جارِ تحليل الصوت بالذكاء الاصطناعي...", aiError: "تعذّر تحليل الصوت، حاول مجدداً أو أدخل البيانات يدوياً",
+    cameraSearch: "صوّر القطعة ليتم التعرف عليها تلقائياً", aiAnalyzingImage: "جارِ تحليل الصورة بالذكاء الاصطناعي...",
+    vinLabel: "رقم الشاصي (VIN) — الأدق لتحديد سيارتك بالضبط", vinPlaceholder: "١٧ رمزًا",
+    vinDecodeBtn: "فك التشفير", vinDecoding: "جارِ التحقق من رقم الشاصي...",
+    vinError: "تعذّر التعرف على هذا الرقم، تأكد من كتابته بشكل صحيح (17 رمزًا)", vinAttached: "رقم الشاصي المرفق",
+    aiImageError: "تعذّر التعرف على القطعة من الصورة، جرّب صورة أوضح أو أدخل البيانات يدوياً",
     noPartsNotice: "لم نجد هذه القطعة حالياً، لكننا سنعمل على توفيرها في أقرب وقت ممكن.",
     requestPartTitle: "اطلب توفير هذه القطعة", requestPartName: "اسم القطعة", requestCarType: "نوع السيارة",
     requestYear: "سنة الصنع", requestCustomerName: "اسمك", requestPhone: "رقم الهاتف",
@@ -75,10 +82,17 @@ const T = {
     createAccount: "Create account",
     searchPh: "Part name or model", allMakes: "All", noResults: "No matching results",
     listening: "Listening... speak now", micUnsupported: "This browser doesn't support voice search",
+    micPermissionDenied: "Please allow microphone access in your browser settings, then try again",
+    micNoSpeech: "No speech was heard, try speaking again", micGenericError: "Something went wrong with voice search, try again",
     heardPrefix: (s) => `Heard: "${s}"`,
     searchCarMake: "Car make", searchCarModel: "Car model", searchYear: "Year of manufacture",
     searchPartNumber: "Part number", searchPartName: "Part name", voiceSearchAll: "Voice search across all fields at once",
     aiAnalyzing: "Analyzing your voice with AI...", aiError: "Couldn't analyze the audio, try again or enter details manually",
+    cameraSearch: "Take a photo of the part to auto-identify it", aiAnalyzingImage: "Analyzing the photo with AI...",
+    vinLabel: "VIN (Chassis Number) — most accurate way to identify your car", vinPlaceholder: "17 characters",
+    vinDecodeBtn: "Decode", vinDecoding: "Checking the VIN...",
+    vinError: "Couldn't recognize this VIN, make sure it's entered correctly (17 characters)", vinAttached: "Attached VIN",
+    aiImageError: "Couldn't identify the part from that photo, try a clearer shot or enter details manually",
     noPartsNotice: "We couldn't find this part right now, but we'll work on sourcing it as soon as possible.",
     requestPartTitle: "Request this part", requestPartName: "Part name", requestCarType: "Car type",
     requestYear: "Year of manufacture", requestCustomerName: "Your name", requestPhone: "Phone number",
@@ -211,6 +225,8 @@ export default function App() {
   const [orders, setOrders] = useState([]);
   const [selectedPart, setSelectedPart] = useState(null);
   const [search, setSearch] = useState({ partName: "", carMake: "", carModel: "", year: "", partNumber: "" });
+  const [vin, setVin] = useState("");
+  const [vinInfo, setVinInfo] = useState(null);
   const [partRequests, setPartRequests] = useState([]);
   const [regForm, setRegForm] = useState({ name: "", phone: "" });
   const [regError, setRegError] = useState("");
@@ -319,6 +335,8 @@ export default function App() {
         body: JSON.stringify({
           customerName: currentUser ? currentUser.name : { ar: "زائر", en: "Guest" },
           items: cart,
+          vin: vin || null,
+          vinInfo: vinInfo || null,
         }),
       });
       const order = await res.json();
@@ -460,6 +478,7 @@ export default function App() {
                     parts={searchResults} hasActiveSearch={hasActiveSearch}
                     onSelect={(p) => { setSelectedPart(p); setScreen("detail"); }}
                     onSubmitRequest={submitPartRequest}
+                    vin={vin} setVin={setVin} vinInfo={vinInfo} setVinInfo={setVinInfo}
                   />
                 )}
                 {screen === "detail" && selectedPart && (
@@ -471,6 +490,7 @@ export default function App() {
                     cart={cart} total={cartTotal} onQty={updateQty} onRemove={removeFromCart}
                     onCheckout={placeOrder} onBrowse={() => setScreen("search")} currentUser={currentUser}
                     onNeedsRegister={() => setScreen("register")}
+                    vin={vin} vinInfo={vinInfo}
                   />
                 )}
                 {screen === "orders" && (
@@ -670,11 +690,15 @@ function Register({ t, regForm, setRegForm, error, onSubmit }) {
   );
 }
 
-function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSearch, onSelect, onSubmitRequest }) {
+function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSearch, onSelect, onSubmitRequest, vin, setVin, vinInfo, setVinInfo }) {
   const [isListening, setIsListening] = useState(false);
   const [voiceError, setVoiceError] = useState("");
   const [heardText, setHeardText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState("");
+  const [vinLoading, setVinLoading] = useState(false);
+  const [vinError, setVinError] = useState("");
   const [reqForm, setReqForm] = useState({ partName: "", carType: "", year: "", name: "", phone: "", email: "" });
   const [reqError, setReqError] = useState("");
   const [reqSubmitted, setReqSubmitted] = useState(false);
@@ -741,13 +765,87 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
     recognition.maxAlternatives = 1;
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => { setIsListening(false); setVoiceError(t.micUnsupported); };
+    recognition.onerror = (event) => {
+      setIsListening(false);
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        setVoiceError(t.micPermissionDenied);
+      } else if (event.error === "no-speech") {
+        setVoiceError(t.micNoSpeech);
+      } else {
+        setVoiceError(t.micGenericError);
+      }
+    };
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setHeardText(transcript);
       analyzeVoiceQuery(transcript);
     };
     recognition.start();
+  }
+
+  async function analyzeImageQuery(file) {
+    setImageError("");
+    setImageLoading(true);
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const [, base64] = dataUrl.split(",");
+      const response = await fetch(`${API_BASE}/ai/identify-part`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64: base64, mediaType: file.type || "image/jpeg" }),
+      });
+      if (!response.ok) throw new Error("ai identify failed");
+      const parsed = await response.json();
+      setSearch((prev) => ({
+        partName: parsed.partName || prev.partName,
+        carMake: parsed.carMake || prev.carMake,
+        carModel: parsed.carModel || prev.carModel,
+        year: parsed.year || prev.year,
+        partNumber: parsed.partNumber || prev.partNumber,
+      }));
+    } catch (err) {
+      setImageError(t.aiImageError);
+    } finally {
+      setImageLoading(false);
+    }
+  }
+
+  function handleImageCapture(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) analyzeImageQuery(file);
+    e.target.value = "";
+  }
+
+  async function decodeVinNumber() {
+    if (!vin.trim()) return;
+    setVinLoading(true);
+    setVinError("");
+    setVinInfo(null);
+    try {
+      const response = await fetch(`${API_BASE}/decode-vin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vin: vin.trim() }),
+      });
+      if (!response.ok) throw new Error("vin decode failed");
+      const info = await response.json();
+      setVinInfo(info);
+      setSearch((prev) => ({
+        ...prev,
+        carMake: info.make || prev.carMake,
+        carModel: info.model || prev.carModel,
+        year: info.year || prev.year,
+      }));
+    } catch (err) {
+      setVinError(t.vinError);
+    } finally {
+      setVinLoading(false);
+    }
   }
 
   const fields = [
@@ -763,18 +861,56 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
       <div className="border border-slate-200 rounded-xl p-3 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500">{t.voiceSearchAll}</span>
-          <button
-            onClick={startVoiceSearch}
-            title={t.voiceSearchAll}
-            className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${isListening ? "bg-red-500 text-white animate-pulse" : "bg-amber-500 text-slate-900"}`}
-          >
-            <Mic size={16} />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <label
+              title={t.cameraSearch}
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 text-slate-600 cursor-pointer"
+            >
+              <Camera size={16} />
+              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageCapture} />
+            </label>
+            <button
+              onClick={startVoiceSearch}
+              title={t.voiceSearchAll}
+              className={`w-9 h-9 rounded-full flex items-center justify-center ${isListening ? "bg-red-500 text-white animate-pulse" : "bg-amber-500 text-slate-900"}`}
+            >
+              <Mic size={16} />
+            </button>
+          </div>
         </div>
         {isListening && <p className="text-xs text-amber-600">{t.listening}</p>}
         {!isListening && aiLoading && <p className="text-xs text-amber-600">{t.aiAnalyzing}</p>}
+        {imageLoading && <p className="text-xs text-amber-600">{t.aiAnalyzingImage}</p>}
         {!isListening && !aiLoading && heardText && <p className="text-xs text-slate-400">{t.heardPrefix(heardText)}</p>}
         {voiceError && <p className="text-xs text-red-500">{voiceError}</p>}
+        {imageError && <p className="text-xs text-red-500">{imageError}</p>}
+
+        <div className="pt-1 border-t border-slate-100">
+          <label className="text-xs text-slate-500 block mb-1">{t.vinLabel}</label>
+          <div className="flex gap-2">
+            <input
+              value={vin}
+              onChange={(e) => setVin(e.target.value.toUpperCase())}
+              placeholder={t.vinPlaceholder}
+              maxLength={17}
+              className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm tracking-wide"
+            />
+            <button
+              onClick={decodeVinNumber}
+              disabled={vinLoading}
+              className="bg-slate-900 text-white text-xs px-4 rounded-lg shrink-0 disabled:opacity-50"
+            >
+              {t.vinDecodeBtn}
+            </button>
+          </div>
+          {vinLoading && <p className="text-xs text-amber-600 mt-1">{t.vinDecoding}</p>}
+          {vinError && <p className="text-xs text-red-500 mt-1">{vinError}</p>}
+          {vinInfo && !vinLoading && (
+            <p className="text-xs text-emerald-700 mt-1">
+              {vinInfo.make} {vinInfo.model} {vinInfo.year}{vinInfo.trim ? ` · ${vinInfo.trim}` : ""}{vinInfo.engine ? ` · ${vinInfo.engine}` : ""}
+            </p>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           {fields.map(({ key, label }) => (
@@ -883,7 +1019,7 @@ function PartDetail({ t, lang, currency, part, onBack, onAdd }) {
   );
 }
 
-function CartScreen({ t, lang, currency, cart, total, onQty, onRemove, onCheckout, onBrowse, currentUser, onNeedsRegister }) {
+function CartScreen({ t, lang, currency, cart, total, onQty, onRemove, onCheckout, onBrowse, currentUser, onNeedsRegister, vin, vinInfo }) {
   if (cart.length === 0) {
     return (
       <div className="p-8 text-center space-y-3">
@@ -914,6 +1050,11 @@ function CartScreen({ t, lang, currency, cart, total, onQty, onRemove, onCheckou
           </div>
         ))}
       </div>
+      {vin && (
+        <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-3 text-xs text-emerald-700">
+          {t.vinAttached}: {vin}{vinInfo ? ` · ${vinInfo.make} ${vinInfo.model} ${vinInfo.year}` : ""}
+        </div>
+      )}
       <div className="border-t border-slate-200 pt-3 flex justify-between text-sm">
         <span className="text-slate-500">{t.total}</span>
         <span className="font-medium text-base">{formatPrice(total, currency, lang)}</span>
@@ -1064,6 +1205,9 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
                   <span className="text-slate-400 text-xs">{o.date}</span>
                 </div>
                 <div className="text-xs text-slate-500">{t.customerLabel}: {L(o.customerName, lang)}</div>
+                {o.vin && (
+                  <div className="text-xs text-emerald-700">{t.vinAttached}: {o.vin}{o.vinInfo ? ` · ${o.vinInfo.make} ${o.vinInfo.model} ${o.vinInfo.year}` : ""}</div>
+                )}
                 <div className="flex justify-between text-xs text-slate-500">
                   <span>{t.totalColon}: {formatPrice(o.total, currency, lang)}</span>
                   <span>{t.commissionColon}: {formatPrice(o.commission, currency, lang)}</span>
