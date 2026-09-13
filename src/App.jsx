@@ -33,6 +33,7 @@ const T = {
     vinLabel: "رقم الشاصي (VIN) — الأدق لتحديد سيارتك بالضبط", vinPlaceholder: "١٧ رمزًا",
     vinDecodeBtn: "فك التشفير", vinDecoding: "جارِ التحقق من رقم الشاصي...",
     vinError: "تعذّر التعرف على هذا الرقم، تأكد من كتابته بشكل صحيح (17 رمزًا)", vinAttached: "رقم الشاصي المرفق",
+    vinApproximate: "معلومة تقريبية من الرقم نفسه (السيارة غير مسجّلة في القاعدة الأمريكية) — يُفضّل تأكيد الموديل يدويًا",
     aiImageError: "تعذّر التعرف على القطعة من الصورة، جرّب صورة أوضح أو أدخل البيانات يدوياً",
     noPartsNotice: "لم نجد هذه القطعة حالياً، لكننا سنعمل على توفيرها في أقرب وقت ممكن.",
     requestPartTitle: "اطلب توفير هذه القطعة", requestPartName: "اسم القطعة", requestCarType: "نوع السيارة",
@@ -92,6 +93,7 @@ const T = {
     vinLabel: "VIN (Chassis Number) — most accurate way to identify your car", vinPlaceholder: "17 characters",
     vinDecodeBtn: "Decode", vinDecoding: "Checking the VIN...",
     vinError: "Couldn't recognize this VIN, make sure it's entered correctly (17 characters)", vinAttached: "Attached VIN",
+    vinApproximate: "Approximate info decoded from the VIN itself (not registered in the US database) — please confirm the model manually",
     aiImageError: "Couldn't identify the part from that photo, try a clearer shot or enter details manually",
     noPartsNotice: "We couldn't find this part right now, but we'll work on sourcing it as soon as possible.",
     requestPartTitle: "Request this part", requestPartName: "Part name", requestCarType: "Car type",
@@ -906,9 +908,12 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
           {vinLoading && <p className="text-xs text-amber-600 mt-1">{t.vinDecoding}</p>}
           {vinError && <p className="text-xs text-red-500 mt-1">{vinError}</p>}
           {vinInfo && !vinLoading && (
-            <p className="text-xs text-emerald-700 mt-1">
-              {vinInfo.make} {vinInfo.model} {vinInfo.year}{vinInfo.trim ? ` · ${vinInfo.trim}` : ""}{vinInfo.engine ? ` · ${vinInfo.engine}` : ""}
-            </p>
+            <div className="mt-1">
+              <p className="text-xs text-emerald-700">
+                {vinInfo.make} {vinInfo.model} {vinInfo.year}{vinInfo.trim ? ` · ${vinInfo.trim}` : ""}{vinInfo.engine ? ` · ${vinInfo.engine}` : ""}
+              </p>
+              {vinInfo.approximate && <p className="text-xs text-amber-600 mt-0.5">{t.vinApproximate}</p>}
+            </div>
           )}
         </div>
 
