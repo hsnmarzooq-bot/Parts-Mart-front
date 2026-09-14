@@ -65,6 +65,9 @@ const T = {
     photoRequestsTab: "طلبات التصوير", noPhotoRequests: "لا توجد طلبات تصوير حتى الآن",
     sendToSuppliersBtn: "إرسال الطلب إلى الموردين", chooseSuppliersTitle: "اختر الموردين",
     noSupplierEmail: "لا يوجد بريد إلكتروني", confirmSendBtn: "تأكيد الإرسال",
+    sendSuccessAll: "تم إرسال البريد لجميع الموردين المختارين بنجاح.",
+    sendFailedAll: "تعذّر إرسال البريد لأي مورد. تحقق من إعداد Resend والبريد الإلكتروني المسجَّل لهم.",
+    sendPartialFail: (failed, total) => `تعذّر الإرسال لـ ${failed} من أصل ${total} موردين. تحقق من بريدهم الإلكتروني.`,
     markFulfilled: "تحديد كمتوفرة الآن", fulfilledBadge: "تم التوفير", pendingBadge: "قيد الانتظار",
     back: "رجوع للبحث", compatibleWith: (m, mo, y) => `متوافقة مع ${m} ${mo} (${y})`,
     condition: "الحالة", availability: "التوفر", availableNow: "متوفرة الآن",
@@ -149,6 +152,9 @@ const T = {
     photoRequestsTab: "Photo Requests", noPhotoRequests: "No photo requests yet",
     sendToSuppliersBtn: "Send request to suppliers", chooseSuppliersTitle: "Choose suppliers",
     noSupplierEmail: "No email on file", confirmSendBtn: "Confirm send",
+    sendSuccessAll: "Email sent successfully to all selected suppliers.",
+    sendFailedAll: "Couldn't send email to any supplier. Check your Resend setup and their registered emails.",
+    sendPartialFail: (failed, total) => `Couldn't send to ${failed} of ${total} suppliers. Check their email addresses.`,
     markFulfilled: "Mark as fulfilled", fulfilledBadge: "Fulfilled", pendingBadge: "Pending",
     back: "Back to search", compatibleWith: (m, mo, y) => `Compatible with ${m} ${mo} (${y})`,
     condition: "Condition", availability: "Availability", availableNow: "Available now",
@@ -514,8 +520,10 @@ export default function App() {
       });
       const updated = await res.json();
       setPhotoRequests((prev) => prev.map((r) => (r.id === requestId ? updated : r)));
+      return updated;
     } catch (e) {
       setApiError(t.apiOffline);
+      return null;
     }
   }
 
@@ -1924,13 +1932,29 @@ function PhotoRequestsAdmin({ t, lang, requests, suppliers, onSendToSuppliers })
     setChecked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
+  const [sendResultMsg, setSendResultMsg] = useState("");
+
   async function confirmSend() {
-    await onSendToSuppliers(pickerFor, checked);
+    const result = await onSendToSuppliers(pickerFor, checked);
     setPickerFor(null);
+    if (!result) return;
+    if (result.emailFailures && result.emailFailures.length === checked.length) {
+      setSendResultMsg(t.sendFailedAll);
+    } else if (result.emailFailures && result.emailFailures.length > 0) {
+      setSendResultMsg(t.sendPartialFail(result.emailFailures.length, checked.length));
+    } else {
+      setSendResultMsg(t.sendSuccessAll);
+    }
   }
 
   return (
     <div className="space-y-2">
+      {sendResultMsg && (
+        <div className="border border-amber-200 bg-amber-50 rounded-xl p-3 text-xs text-amber-800 flex justify-between items-start gap-2">
+          <span>{sendResultMsg}</span>
+          <button onClick={() => setSendResultMsg("")}><X size={14} /></button>
+        </div>
+      )}
       {requests.length === 0 && <p className="text-sm text-slate-400 text-center py-8">{t.noPhotoRequests}</p>}
       {requests.map((r) => (
         <div key={r.id} className="border border-slate-200 rounded-xl p-3 space-y-2 text-sm">
