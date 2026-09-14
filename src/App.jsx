@@ -31,6 +31,7 @@ const T = {
     registerTitle: "تسجيل حساب جديد", fullName: "الاسم الكامل", namePh: "مثال: أحمد السالم",
     phone: "رقم الجوال", phonePh: "05xxxxxxxx", fillFields: "الرجاء تعبئة كل الحقول",
     loginTitle: "تسجيل الدخول", emailLabel: "البريد الإلكتروني", usernameTaken: "اسم المستخدم هذا محجوز، اختر اسمًا آخر",
+    emailTaken: "هذا البريد الإلكتروني مُستخدَم بالفعل لحساب آخر",
     noAccountYet: "ليس لديك حساب؟", createAccountLink: "سجّل الآن", haveAccountAlready: "لديك حساب بالفعل؟", loginLink: "سجّل الدخول", logoutBtn: "تسجيل الخروج",
     emailNotVerified: "لم يتم تأكيد بريدك الإلكتروني بعد", resendVerification: "إعادة إرسال رسالة التأكيد",
     verificationResent: "أُعيد إرسال رسالة التأكيد إلى بريدك",
@@ -106,6 +107,7 @@ const T = {
     registerTitle: "Create a new account", fullName: "Full name", namePh: "e.g. Ahmed Al-Salem",
     phone: "Mobile number", phonePh: "05xxxxxxxx", fillFields: "Please fill in all fields",
     loginTitle: "Log In", emailLabel: "Email", usernameTaken: "This username is taken, choose another one",
+    emailTaken: "This email is already registered to another account",
     noAccountYet: "Don't have an account?", createAccountLink: "Sign up", haveAccountAlready: "Already have an account?", loginLink: "Log in", logoutBtn: "Log out",
     emailNotVerified: "Your email hasn't been verified yet", resendVerification: "Resend confirmation email",
     verificationResent: "Confirmation email resent",
@@ -359,7 +361,8 @@ export default function App() {
         body: JSON.stringify({ username, password, name, phone, email }),
       });
       if (res.status === 409) {
-        setRegError(t.usernameTaken);
+        const errBody = await res.json().catch(() => ({}));
+        setRegError(errBody.reason === "email" ? t.emailTaken : t.usernameTaken);
         return;
       }
       if (!res.ok) throw new Error("register failed");
