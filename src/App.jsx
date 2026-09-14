@@ -1460,6 +1460,7 @@ function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onS
 
   const [editingRequest, setEditingRequest] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [expandedId, setExpandedId] = useState(null);
 
   async function submitProfile() {
     const ok = await onSubmitRequest("profile_update", profileForm);
@@ -1559,12 +1560,34 @@ function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onS
             {requests.length === 0 && <p className="text-sm text-slate-400 text-center py-8">{t.myRequestsEmpty}</p>}
             {requests.map((r) => (
               <div key={r.id} className="border border-slate-200 rounded-xl p-3 space-y-2 text-sm">
-                <div className="flex justify-between items-center">
+                <button
+                  onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
+                  className="w-full flex justify-between items-center text-start"
+                >
                   <span className="text-xs font-medium">{r.type === "profile_update" ? t.requestTypeProfile : t.requestTypeNewPart}</span>
                   <RequestStatusBadge t={t} status={r.status} />
-                </div>
+                </button>
                 <div className="text-xs text-slate-500">{r.date}</div>
                 {r.adminNote && <div className="text-xs text-amber-700">{t.reviewNotePh}: {r.adminNote}</div>}
+
+                {expandedId === r.id && (
+                  <div className="space-y-1 pt-2 border-t border-slate-100">
+                    {r.type === "profile_update" ? (
+                      <>
+                        <div className="flex justify-between text-xs"><span className="text-slate-500">{t.shopName}</span><span>{r.payload.name}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-slate-500">{t.city}</span><span>{r.payload.city}</span></div>
+                        <div className="flex justify-between text-xs"><span className="text-slate-500">{t.contactNumber}</span><span>{r.payload.phone}</span></div>
+                      </>
+                    ) : (
+                      partFieldDefs.concat([{ key: "price", label: t.price }]).map(({ key, label }) => (
+                        <div key={key} className="flex justify-between text-xs">
+                          <span className="text-slate-500">{label}</span>
+                          <span>{r.payload[key]}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
 
                 {r.status === "returned" && editingRequest !== r.id && (
                   <button onClick={() => startEdit(r)} className="text-xs text-amber-600">{t.resubmitBtn}</button>
