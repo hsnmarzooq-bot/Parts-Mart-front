@@ -26,6 +26,10 @@ const T = {
     navHome: "الرئيسية", navSearch: "بحث", navCart: "السلة", navOrders: "طلباتي",
     welcome: (n) => `أهلاً ${n}`, heroTitle: "ابحث عن أي قطعة غيار",
     heroSubtitle: "أدخل نوع سيارتك وموديلها لنعرض لك أفضل الأسعار من موردين موثوقين",
+    snapSendTitle: "صوّر وطرش", snapSendDesc: "صوّر القطعة التي تبحث عنها وأرسلها، وسنقوم بتوفيرها",
+    quantityField: "عدد القطع المطلوبة", optionalField: "اختياري", sendingLabel: "جارِ الإرسال...",
+    photoRequestSentTitle: "تم إرسال طلبك", photoRequestSentBody: "طلبك الآن قيد التنفيذ، وسنُعلمك فور توفّره.",
+    photoReqPending: "قيد التنفيذ", photoReqSentToSuppliers: "أُرسل للموردين",
     startSearch: "ابدأ البحث", registerBanner: "سجّل حسابك لمتابعة طلباتك",
     statSuppliers: "مورد قطع غيار", statHidden: "هوية مخفية", statHiddenSub: "حماية بيانات الموردين",
     registerTitle: "تسجيل حساب جديد", fullName: "الاسم الكامل", namePh: "مثال: أحمد السالم",
@@ -58,6 +62,9 @@ const T = {
     requestSuccessMsg: "تم استلام طلبك، وسنُعلمك فور توفير القطعة.",
     requestFillFields: "الرجاء تعبئة جميع الحقول",
     partRequestsTab: "طلبات ناقصة", noPartRequests: "لا توجد طلبات قطع غير متوفرة حالياً",
+    photoRequestsTab: "طلبات التصوير", noPhotoRequests: "لا توجد طلبات تصوير حتى الآن",
+    sendToSuppliersBtn: "إرسال الطلب إلى الموردين", chooseSuppliersTitle: "اختر الموردين",
+    noSupplierEmail: "لا يوجد بريد إلكتروني", confirmSendBtn: "تأكيد الإرسال",
     markFulfilled: "تحديد كمتوفرة الآن", fulfilledBadge: "تم التوفير", pendingBadge: "قيد الانتظار",
     back: "رجوع للبحث", compatibleWith: (m, mo, y) => `متوافقة مع ${m} ${mo} (${y})`,
     condition: "الحالة", availability: "التوفر", availableNow: "متوفرة الآن",
@@ -79,6 +86,7 @@ const T = {
     noSelfRegNote: "لا يوجد تسجيل ذاتي للموردين — الإدارة فقط من تُنشئ الحسابات وتمنحهم بيانات الدخول.",
     shopName: "اسم المحل", city: "المدينة", contactNumber: "رقم التواصل", fillShopFields: "الرجاء تعبئة اسم المحل ورقم التواصل",
     createAccountBtn: "إنشاء الحساب", hiddenIdentityNote: "هوية الموردين مرئية هنا فقط، ولا تظهر أبداً لواجهة العميل.",
+    editBtn: "تعديل", editSupplierTitle: "تعديل بيانات المورد", newPasswordPh: "كلمة مرور جديدة (اتركها فارغة لعدم التغيير)", saveBtn: "حفظ التعديلات",
     noCustomers: "لا يوجد عملاء مسجّلون بعد", customerDetailsTitle: "بيانات العميل",
     language: "اللغة", currency: "العملة", arabic: "عربي", english: "English",
     sar: "ريال سعودي", bhd: "دينار بحريني",
@@ -102,6 +110,10 @@ const T = {
     navHome: "Home", navSearch: "Search", navCart: "Cart", navOrders: "Orders",
     welcome: (n) => `Welcome ${n}`, heroTitle: "Find any spare part",
     heroSubtitle: "Enter your car's make and model to see the best prices from trusted suppliers",
+    snapSendTitle: "Snap & Send", snapSendDesc: "Photograph the part you need and send it — we'll source it for you",
+    quantityField: "Quantity needed", optionalField: "optional", sendingLabel: "Sending...",
+    photoRequestSentTitle: "Request sent", photoRequestSentBody: "Your request is now in progress — we'll notify you once it's ready.",
+    photoReqPending: "In progress", photoReqSentToSuppliers: "Sent to suppliers",
     startSearch: "Start searching", registerBanner: "Sign up to track your orders",
     statSuppliers: "spare part suppliers", statHidden: "Identity hidden", statHiddenSub: "Supplier data is protected",
     registerTitle: "Create a new account", fullName: "Full name", namePh: "e.g. Ahmed Al-Salem",
@@ -134,6 +146,9 @@ const T = {
     requestSuccessMsg: "Your request has been received. We'll notify you once the part is available.",
     requestFillFields: "Please fill in all fields",
     partRequestsTab: "Missing requests", noPartRequests: "No unavailable-part requests yet",
+    photoRequestsTab: "Photo Requests", noPhotoRequests: "No photo requests yet",
+    sendToSuppliersBtn: "Send request to suppliers", chooseSuppliersTitle: "Choose suppliers",
+    noSupplierEmail: "No email on file", confirmSendBtn: "Confirm send",
     markFulfilled: "Mark as fulfilled", fulfilledBadge: "Fulfilled", pendingBadge: "Pending",
     back: "Back to search", compatibleWith: (m, mo, y) => `Compatible with ${m} ${mo} (${y})`,
     condition: "Condition", availability: "Availability", availableNow: "Available now",
@@ -155,6 +170,7 @@ const T = {
     noSelfRegNote: "There is no supplier self-registration — only Admin can create accounts and issue login details.",
     shopName: "Shop name", city: "City", contactNumber: "Contact number", fillShopFields: "Please fill in the shop name and contact number",
     createAccountBtn: "Create account", hiddenIdentityNote: "Supplier identity is only visible here, and is never shown on the customer app.",
+    editBtn: "Edit", editSupplierTitle: "Edit Supplier", newPasswordPh: "New password (leave blank to keep unchanged)", saveBtn: "Save changes",
     noCustomers: "No customers registered yet", customerDetailsTitle: "Customer Details",
     language: "Language", currency: "Currency", arabic: "عربي", english: "English",
     sar: "Saudi Riyal", bhd: "Bahraini Dinar",
@@ -255,7 +271,7 @@ export default function App() {
   const [parts, setParts] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [newSupplier, setNewSupplier] = useState({ name: "", city: "", phone: "", username: "", password: "" });
+  const [newSupplier, setNewSupplier] = useState({ name: "", city: "", phone: "", email: "", username: "", password: "" });
   const [supplierError, setSupplierError] = useState("");
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -264,6 +280,7 @@ export default function App() {
   const [vin, setVin] = useState("");
   const [vinInfo, setVinInfo] = useState(null);
   const [partRequests, setPartRequests] = useState([]);
+  const [photoRequests, setPhotoRequests] = useState([]);
   const [regForm, setRegForm] = useState({ username: "", password: "", name: "", phone: "", email: "" });
   const [regError, setRegError] = useState("");
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
@@ -278,15 +295,16 @@ export default function App() {
   useEffect(() => {
     async function loadAll() {
       try {
-        const [partsRes, suppliersRes, ordersRes, customersRes, requestsRes, supplierReqRes] = await Promise.all([
+        const [partsRes, suppliersRes, ordersRes, customersRes, requestsRes, supplierReqRes, photoReqRes] = await Promise.all([
           fetch(`${API_BASE}/parts`),
           fetch(`${API_BASE}/suppliers`),
           fetch(`${API_BASE}/orders`),
           fetch(`${API_BASE}/customers`),
           fetch(`${API_BASE}/part-requests`),
           fetch(`${API_BASE}/supplier-requests`),
+          fetch(`${API_BASE}/photo-requests`),
         ]);
-        const responses = [partsRes, suppliersRes, ordersRes, customersRes, requestsRes, supplierReqRes];
+        const responses = [partsRes, suppliersRes, ordersRes, customersRes, requestsRes, supplierReqRes, photoReqRes];
         if (responses.some((r) => !r.ok)) throw new Error("one or more endpoints returned an error");
         setParts(await partsRes.json());
         setSuppliers(await suppliersRes.json());
@@ -294,6 +312,7 @@ export default function App() {
         setCustomers(await customersRes.json());
         setPartRequests(await requestsRes.json());
         setSupplierRequests(await supplierReqRes.json());
+        setPhotoRequests(await photoReqRes.json());
         setApiError("");
       } catch (e) {
         setApiError(t.apiOffline);
@@ -470,6 +489,36 @@ export default function App() {
     }
   }
 
+  async function submitPhotoRequest(data) {
+    try {
+      const res = await fetch(`${API_BASE}/photo-requests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerId: currentUser.id, customerName: currentUser.name, ...data }),
+      });
+      if (!res.ok) return false;
+      const req = await res.json();
+      setPhotoRequests((prev) => [req, ...prev]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function sendPhotoRequestToSuppliers(requestId, supplierIds) {
+    try {
+      const res = await fetch(`${API_BASE}/photo-requests/${requestId}/send-to-suppliers`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ supplierIds }),
+      });
+      const updated = await res.json();
+      setPhotoRequests((prev) => prev.map((r) => (r.id === requestId ? updated : r)));
+    } catch (e) {
+      setApiError(t.apiOffline);
+    }
+  }
+
   async function markRequestFulfilled(id) {
     try {
       const res = await fetch(`${API_BASE}/part-requests/${id}`, {
@@ -485,7 +534,7 @@ export default function App() {
   }
 
   async function addSupplier() {
-    if (!newSupplier.name.trim() || !newSupplier.phone.trim() || !newSupplier.username.trim() || !newSupplier.password.trim()) {
+    if (!newSupplier.name.trim() || !newSupplier.phone.trim() || !newSupplier.email.trim() || !newSupplier.username.trim() || !newSupplier.password.trim()) {
       setSupplierError(t.fillShopFields);
       return;
     }
@@ -494,16 +543,32 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newSupplier.name, city: newSupplier.city || "-", phone: newSupplier.phone,
+          name: newSupplier.name, city: newSupplier.city || "-", phone: newSupplier.phone, email: newSupplier.email,
           username: newSupplier.username, password: newSupplier.password,
         }),
       });
       const supplier = await res.json();
       setSuppliers((prev) => [...prev, supplier]);
-      setNewSupplier({ name: "", city: "", phone: "", username: "", password: "" });
+      setNewSupplier({ name: "", city: "", phone: "", email: "", username: "", password: "" });
       setSupplierError("");
     } catch (e) {
       setSupplierError(t.apiOffline);
+    }
+  }
+
+  async function updateSupplier(id, data) {
+    try {
+      const res = await fetch(`${API_BASE}/suppliers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) return false;
+      const updated = await res.json();
+      setSuppliers((prev) => prev.map((s) => (s.id === id ? updated : s)));
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -612,7 +677,7 @@ export default function App() {
             {role === "customer" ? (
               <>
                 {screen === "home" && (
-                  <Home t={t} lang={lang} currentUser={currentUser} onSearch={() => setScreen("search")} onRegister={() => setScreen("login")} onLogout={() => setCurrentUser(null)} />
+                  <Home t={t} lang={lang} currentUser={currentUser} onSearch={() => setScreen("search")} onRegister={() => setScreen("login")} onLogout={() => setCurrentUser(null)} onSnapSend={() => setScreen("photoRequest")} />
                 )}
                 {screen === "login" && (
                   <Login t={t} loginForm={loginForm} setLoginForm={setLoginForm} error={loginError} onSubmit={submitLogin} onGoToRegister={() => setScreen("register")} onResend={resendVerification} />
@@ -622,6 +687,9 @@ export default function App() {
                 )}
                 {screen === "register" && (
                   <Register t={t} regForm={regForm} setRegForm={setRegForm} error={regError} onSubmit={submitRegistration} onGoToLogin={() => setScreen("login")} />
+                )}
+                {screen === "photoRequest" && (
+                  <PhotoRequest t={t} onSubmit={submitPhotoRequest} onBack={() => setScreen("home")} onDone={() => setScreen("orders")} />
                 )}
                 {screen === "search" && (
                   <SearchScreen
@@ -646,7 +714,10 @@ export default function App() {
                   />
                 )}
                 {screen === "orders" && (
-                  <OrdersScreen t={t} lang={lang} currency={currency} orders={orders} />
+                  <OrdersScreen
+                    t={t} lang={lang} currency={currency} orders={orders}
+                    photoRequests={currentUser ? photoRequests.filter((r) => r.customerId === currentUser.id) : []}
+                  />
                 )}
               </>
             ) : role === "supplier" ? (
@@ -669,9 +740,10 @@ export default function App() {
                 orders={orders} onAdvance={advanceOrderStatus}
                 newPart={newPart} setNewPart={setNewPart} onAddPart={addPart}
                 newSupplier={newSupplier} setNewSupplier={setNewSupplier}
-                onAddSupplier={addSupplier} supplierError={supplierError}
+                onAddSupplier={addSupplier} supplierError={supplierError} onUpdateSupplier={updateSupplier}
                 partRequests={partRequests} onMarkFulfilled={markRequestFulfilled}
                 supplierRequests={supplierRequests} onReviewSupplierRequest={reviewSupplierRequest}
+                photoRequests={photoRequests} onSendToSuppliers={sendPhotoRequestToSuppliers}
               />
             ) : (
               <AdminLogin t={t} onSuccess={() => { setAdminAuthenticated(true); setScreen("overview"); }} />
@@ -795,7 +867,7 @@ function SidebarNav({ t, lang, screen, setScreen, cartCount }) {
   );
 }
 
-function Home({ t, lang, currentUser, onSearch, onRegister, onLogout }) {
+function Home({ t, lang, currentUser, onSearch, onRegister, onLogout, onSnapSend }) {
   return (
     <div className="p-5 space-y-5">
       <div className="bg-slate-900 rounded-xl p-5 text-white">
@@ -807,6 +879,20 @@ function Home({ t, lang, currentUser, onSearch, onRegister, onLogout }) {
           <Search size={16} /> {t.startSearch}
         </button>
       </div>
+
+      <button
+        onClick={() => (currentUser ? onSnapSend() : onRegister())}
+        className="w-full bg-amber-500 rounded-xl p-4 flex items-center gap-4 text-start"
+      >
+        <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
+          <Camera size={22} className="text-amber-500" />
+        </div>
+        <div className="flex-1">
+          <div className="text-slate-900 font-medium text-base">{t.snapSendTitle}</div>
+          <div className="text-slate-800 text-xs mt-0.5">{t.snapSendDesc}</div>
+        </div>
+        <ChevronLeft size={18} className="text-slate-900 rtl:block ltr:rotate-180" />
+      </button>
 
       {!currentUser ? (
         <button onClick={onRegister} className="w-full border border-slate-300 rounded-xl p-4 flex items-center justify-between text-sm">
@@ -1255,6 +1341,109 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
   );
 }
 
+function PhotoRequest({ t, onSubmit, onBack, onDone }) {
+  const [photo, setPhoto] = useState(null);
+  const [form, setForm] = useState({ carMake: "", carType: "", year: "", cylinders: "", engineSize: "", quantity: "1" });
+  const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  function handleCapture(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPhoto(reader.result);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  async function handleSubmit() {
+    if (!photo || !form.carMake.trim() || !form.carType.trim() || !form.year.trim() || !form.quantity.trim()) {
+      setError(t.requestFillFields);
+      return;
+    }
+    setSending(true);
+    const ok = await onSubmit({ image: photo, ...form });
+    setSending(false);
+    if (ok) setSent(true);
+    else setError(t.apiOffline);
+  }
+
+  if (sent) {
+    return (
+      <div className="p-6 max-w-xs mx-auto text-center space-y-4">
+        <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
+          <Check size={24} className="text-emerald-600" />
+        </div>
+        <h2 className="text-base font-medium">{t.photoRequestSentTitle}</h2>
+        <p className="text-sm text-slate-500">{t.photoRequestSentBody}</p>
+        <button onClick={onDone} className="w-full bg-slate-900 text-white text-sm py-2.5 rounded-lg font-medium">{t.navOrders}</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 space-y-4">
+      <button onClick={onBack} className="text-sm text-slate-500 flex items-center gap-1">
+        <ChevronRight size={16} className="ltr:rotate-180" /> {t.back}
+      </button>
+      <h2 className="text-base font-medium">{t.snapSendTitle}</h2>
+
+      {photo ? (
+        <div className="relative">
+          <img src={photo} alt="" className="w-full h-48 object-cover rounded-xl border border-slate-200" />
+          <label className="absolute bottom-2 left-2 bg-white/90 text-xs px-3 py-1.5 rounded-lg cursor-pointer">
+            {t.changeImage}
+            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCapture} />
+          </label>
+        </div>
+      ) : (
+        <label className="w-full h-40 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-400 cursor-pointer">
+          <Camera size={28} />
+          <span className="text-xs">{t.uploadFromDevice}</span>
+          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCapture} />
+        </label>
+      )}
+
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.carMakeField}</label>
+          <input value={form.carMake} onChange={(e) => setForm({ ...form, carMake: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.carTypeField}</label>
+          <input value={form.carType} onChange={(e) => setForm({ ...form, carType: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.years}</label>
+          <input value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.quantityField}</label>
+          <input type="number" min="1" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.cylindersLabel} <span className="text-slate-300">({t.optionalField})</span></label>
+          <input value={form.cylinders} onChange={(e) => setForm({ ...form, cylinders: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label className="text-xs text-slate-500 block mb-1">{t.engineSizeLabel} <span className="text-slate-300">({t.optionalField})</span></label>
+          <input value={form.engineSize} onChange={(e) => setForm({ ...form, engineSize: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+        </div>
+      </div>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      <button onClick={handleSubmit} disabled={sending} className="w-full bg-amber-500 text-slate-900 text-sm py-2.5 rounded-lg font-medium disabled:opacity-50">
+        {sending ? t.sendingLabel : t.submitRequest}
+      </button>
+    </div>
+  );
+}
+
 function PartDetail({ t, lang, currency, part, onBack, onAdd }) {
   return (
     <div className="p-4 space-y-4">
@@ -1334,12 +1523,24 @@ function CartScreen({ t, lang, currency, cart, total, onQty, onRemove, onCheckou
   );
 }
 
-function OrdersScreen({ t, lang, currency, orders }) {
-  if (orders.length === 0) {
+function OrdersScreen({ t, lang, currency, orders, photoRequests }) {
+  if (orders.length === 0 && (!photoRequests || photoRequests.length === 0)) {
     return <p className="text-sm text-slate-400 text-center py-10">{t.noOrders}</p>;
   }
   return (
     <div className="p-4 space-y-4">
+      {photoRequests && photoRequests.map((r) => (
+        <div key={r.id} className="border border-slate-200 rounded-xl p-4 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium flex items-center gap-1.5"><Camera size={14} className="text-amber-600" /> {t.snapSendTitle}</span>
+            <span className="text-xs text-slate-400">{r.date}</span>
+          </div>
+          <div className="text-xs text-slate-500">{[r.carMake, r.carType, r.year].filter(Boolean).join(" · ")}</div>
+          <span className={`text-xs px-2 py-1 rounded-full inline-block ${r.status === "sent_to_suppliers" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>
+            {r.status === "sent_to_suppliers" ? t.photoReqSentToSuppliers : t.photoReqPending}
+          </span>
+        </div>
+      ))}
       {orders.map((o) => (
         <div key={o.id} className="border border-slate-200 rounded-xl p-4 space-y-3">
           <div className="flex justify-between items-center">
@@ -1709,20 +1910,115 @@ function SupplierRequestsReview({ t, lang, requests, onReview }) {
   );
 }
 
-function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppliers, parts, orders, onAdvance, newPart, setNewPart, onAddPart, newSupplier, setNewSupplier, onAddSupplier, supplierError, partRequests, onMarkFulfilled, supplierRequests, onReviewSupplierRequest }) {
+function PhotoRequestsAdmin({ t, lang, requests, suppliers, onSendToSuppliers }) {
+  const [expandedId, setExpandedId] = useState(null);
+  const [pickerFor, setPickerFor] = useState(null);
+  const [checked, setChecked] = useState([]);
+
+  function openPicker(id) {
+    setPickerFor(id);
+    setChecked([]);
+  }
+
+  function toggleSupplier(id) {
+    setChecked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  async function confirmSend() {
+    await onSendToSuppliers(pickerFor, checked);
+    setPickerFor(null);
+  }
+
+  return (
+    <div className="space-y-2">
+      {requests.length === 0 && <p className="text-sm text-slate-400 text-center py-8">{t.noPhotoRequests}</p>}
+      {requests.map((r) => (
+        <div key={r.id} className="border border-slate-200 rounded-xl p-3 space-y-2 text-sm">
+          <button onClick={() => setExpandedId(expandedId === r.id ? null : r.id)} className="w-full flex justify-between items-center text-start">
+            <span className="text-xs font-medium">{L(r.customerName, lang)}</span>
+            <span className={`text-xs px-2 py-1 rounded-full ${r.status === "sent_to_suppliers" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>
+              {r.status === "sent_to_suppliers" ? t.photoReqSentToSuppliers : t.photoReqPending}
+            </span>
+          </button>
+          <div className="text-xs text-slate-500">{[r.carMake, r.carType, r.year].filter(Boolean).join(" · ")} · {r.date}</div>
+
+          {expandedId === r.id && (
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              {r.image && <img src={r.image} alt="" className="w-full h-40 object-cover rounded-lg" />}
+              {r.cylinders && <div className="text-xs text-slate-600">{t.cylindersLabel}: {r.cylinders}</div>}
+              {r.engineSize && <div className="text-xs text-slate-600">{t.engineSizeLabel}: {r.engineSize}</div>}
+              <div className="text-xs text-slate-600">{t.quantityField}: {r.quantity || 1}</div>
+              <button onClick={() => openPicker(r.id)} className="w-full bg-slate-900 text-white text-xs py-2 rounded-lg">
+                {t.sendToSuppliersBtn}
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {pickerFor && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50" onClick={() => setPickerFor(null)}>
+          <div className="bg-white rounded-xl p-5 w-full max-w-xs space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-medium">{t.chooseSuppliersTitle}</h3>
+              <button onClick={() => setPickerFor(null)}><X size={18} className="text-slate-400" /></button>
+            </div>
+            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+              {suppliers.map((s) => (
+                <label key={s.id} className="flex items-center gap-2 text-sm border border-slate-200 rounded-lg px-3 py-2">
+                  <input type="checkbox" checked={checked.includes(s.id)} onChange={() => toggleSupplier(s.id)} />
+                  <span className="flex-1">{L(s.name, lang)}</span>
+                  {!s.email && <span className="text-xs text-red-500">{t.noSupplierEmail}</span>}
+                </label>
+              ))}
+            </div>
+            <button onClick={confirmSend} disabled={checked.length === 0} className="w-full bg-amber-500 text-slate-900 text-sm py-2.5 rounded-lg font-medium disabled:opacity-50">
+              {t.confirmSendBtn}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppliers, parts, orders, onAdvance, newPart, setNewPart, onAddPart, newSupplier, setNewSupplier, onAddSupplier, supplierError, partRequests, onMarkFulfilled, supplierRequests, onReviewSupplierRequest, photoRequests, onSendToSuppliers, onUpdateSupplier }) {
   const tabs = [
     { key: "overview", label: t.overview, icon: LayoutDashboard },
     { key: "orders", label: t.ordersTab, icon: ClipboardList },
     { key: "parts", label: t.partsTab, icon: Package },
     { key: "requests", label: t.partRequestsTab, icon: Bell },
+    { key: "photoRequests", label: t.photoRequestsTab, icon: Camera },
     { key: "supplierRequests", label: t.adminSupplierRequestsTab, icon: Bell },
     { key: "suppliers", label: t.suppliersTab, icon: Store },
     { key: "customers", label: t.customersTab, icon: Users },
   ];
-  const activeTab = ["overview", "orders", "parts", "requests", "supplierRequests", "suppliers", "customers"].includes(screen) ? screen : "overview";
+  const activeTab = ["overview", "orders", "parts", "requests", "photoRequests", "supplierRequests", "suppliers", "customers"].includes(screen) ? screen : "overview";
   const totalCommission = orders.reduce((s, o) => s + o.commission, 0);
   const totalSales = orders.reduce((s, o) => s + o.total, 0);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [editSupplierForm, setEditSupplierForm] = useState(null);
+  const [editSupplierError, setEditSupplierError] = useState("");
+
+  function startEditSupplier(s) {
+    setEditingSupplier(s);
+    setEditSupplierForm({
+      name: L(s.name, lang), city: L(s.city, lang), phone: s.phone || "", email: s.email || "",
+      username: s.username || "", password: "",
+    });
+    setEditSupplierError("");
+  }
+
+  async function saveSupplierEdit() {
+    if (!editSupplierForm.name.trim() || !editSupplierForm.phone.trim() || !editSupplierForm.email.trim() || !editSupplierForm.username.trim()) {
+      setEditSupplierError(t.fillShopFields);
+      return;
+    }
+    const ok = await onUpdateSupplier(editingSupplier.id, editSupplierForm);
+    if (ok) setEditingSupplier(null);
+    else setEditSupplierError(t.apiOffline);
+  }
 
   return (
     <div>
@@ -1889,6 +2185,10 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
           </div>
         )}
 
+        {activeTab === "photoRequests" && (
+          <PhotoRequestsAdmin t={t} lang={lang} requests={photoRequests} suppliers={suppliers} onSendToSuppliers={onSendToSuppliers} />
+        )}
+
         {activeTab === "supplierRequests" && (
           <SupplierRequestsReview t={t} lang={lang} requests={supplierRequests} onReview={onReviewSupplierRequest} />
         )}
@@ -1903,6 +2203,7 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
                 <input placeholder={t.city} value={newSupplier.city} onChange={(e) => setNewSupplier({ ...newSupplier, city: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
                 <input placeholder={t.contactNumber} value={newSupplier.phone} onChange={(e) => setNewSupplier({ ...newSupplier, phone: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
               </div>
+              <input placeholder={t.emailLabel} type="email" value={newSupplier.email} onChange={(e) => setNewSupplier({ ...newSupplier, email: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
               <div className="grid grid-cols-2 gap-2">
                 <input placeholder={t.username} value={newSupplier.username} onChange={(e) => setNewSupplier({ ...newSupplier, username: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
                 <input placeholder={t.password} type="text" value={newSupplier.password} onChange={(e) => setNewSupplier({ ...newSupplier, password: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
@@ -1916,9 +2217,12 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
                 <div key={s.id} className="border border-slate-200 rounded-xl p-3 flex justify-between items-center text-sm">
                   <div>
                     <div>{L(s.name, lang)}</div>
-                    <div className="text-xs text-slate-400">{L(s.city, lang)}{s.rating ? ` · ${s.rating}` : ""}</div>
+                    <div className="text-xs text-slate-400">{L(s.city, lang)}{s.rating ? ` · ${s.rating}` : ""}{s.email ? ` · ${s.email}` : ""}</div>
                   </div>
-                  <span className="text-xs text-slate-500">{s.partsCount}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-500">{s.partsCount}</span>
+                    <button onClick={() => startEditSupplier(s)} className="text-xs text-amber-600">{t.editBtn}</button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1956,6 +2260,29 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
               <div className="flex justify-between"><span className="text-slate-500">{t.phone}</span><span>{selectedCustomer.phone}</span></div>
               <div className="flex justify-between"><span className="text-slate-500">{t.emailLabel}</span><span>{selectedCustomer.email}</span></div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {editingSupplier && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50" onClick={() => setEditingSupplier(null)}>
+          <div className="bg-white rounded-xl p-5 w-full max-w-xs space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-medium">{t.editSupplierTitle}</h3>
+              <button onClick={() => setEditingSupplier(null)}><X size={18} className="text-slate-400" /></button>
+            </div>
+            <input placeholder={t.shopName} value={editSupplierForm.name} onChange={(e) => setEditSupplierForm({ ...editSupplierForm, name: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            <div className="grid grid-cols-2 gap-2">
+              <input placeholder={t.city} value={editSupplierForm.city} onChange={(e) => setEditSupplierForm({ ...editSupplierForm, city: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+              <input placeholder={t.contactNumber} value={editSupplierForm.phone} onChange={(e) => setEditSupplierForm({ ...editSupplierForm, phone: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <input placeholder={t.emailLabel} type="email" value={editSupplierForm.email} onChange={(e) => setEditSupplierForm({ ...editSupplierForm, email: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            <div className="grid grid-cols-2 gap-2">
+              <input placeholder={t.username} value={editSupplierForm.username} onChange={(e) => setEditSupplierForm({ ...editSupplierForm, username: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+              <input placeholder={t.newPasswordPh} value={editSupplierForm.password} onChange={(e) => setEditSupplierForm({ ...editSupplierForm, password: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            </div>
+            {editSupplierError && <p className="text-xs text-red-600">{editSupplierError}</p>}
+            <button onClick={saveSupplierEdit} className="w-full bg-slate-900 text-white text-sm py-2.5 rounded-lg font-medium">{t.saveBtn}</button>
           </div>
         </div>
       )}
