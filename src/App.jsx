@@ -12,7 +12,8 @@ const T = {
   ar: {
     appName: "Parts Mart", customerTab: "العميل", adminTab: "الإدارة", supplierTab: "المورد",
     supplierLoginTitle: "تسجيل دخول المورد", supplierLoginNote: "بيانات الدخول هذه تُعطى للمورد ليستخدمها في بوابته الخاصة",
-    myProfileTab: "بياناتي", addPartTab: "إضافة قطعة", myRequestsTab: "طلباتي",
+    myProfileTab: "بياناتي", myProductsTab: "منتجاتي", addPartTab: "إضافة قطعة", myRequestsTab: "طلباتي",
+    noMyProducts: "لا توجد قطع مسجَّلة باسمك حاليًا", requestTypeUpdatePart: "تعديل قطعة",
     requestProfileUpdate: "إرسال طلب تحديث", manufacturerLabel: "شركة الصنع", carTypeField: "نوع السيارة",
     carMakeField: "ماركة السيارة", cylindersLabel: "عدد الأسطوانات", engineSizeLabel: "حجم المحرك",
     reqPending: "قيد المراجعة", reqApproved: "معتمد", reqRejected: "مرفوض", reqReturned: "مرتجع للتعديل",
@@ -99,7 +100,8 @@ const T = {
   en: {
     appName: "Parts Mart", customerTab: "Customer", adminTab: "Admin", supplierTab: "Supplier",
     supplierLoginTitle: "Supplier Login", supplierLoginNote: "These login details are given to the supplier for their own portal",
-    myProfileTab: "My Profile", addPartTab: "Add Part", myRequestsTab: "My Requests",
+    myProfileTab: "My Profile", myProductsTab: "My Products", addPartTab: "Add Part", myRequestsTab: "My Requests",
+    noMyProducts: "You don't have any listed parts yet", requestTypeUpdatePart: "Part update",
     requestProfileUpdate: "Submit update request", manufacturerLabel: "Manufacturer", carTypeField: "Car type",
     carMakeField: "Car make", cylindersLabel: "Number of cylinders", engineSizeLabel: "Engine size",
     reqPending: "Pending review", reqApproved: "Approved", reqRejected: "Rejected", reqReturned: "Returned for edits",
@@ -266,7 +268,7 @@ export default function App() {
   }, []);
 
   const [lang, setLang] = useState("ar");
-  const [currency, setCurrency] = useState("SAR");
+  const [currency, setCurrency] = useState("BHD");
   const [role, setRole] = useState("customer");
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [currentSupplier, setCurrentSupplier] = useState(null);
@@ -292,7 +294,7 @@ export default function App() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [registeredEmail, setRegisteredEmail] = useState("");
-  const [newPart, setNewPart] = useState({ name: "", make: "", model: "", year: "", price: "", sku: "", aliases: "", supplierId: "", image: null });
+  const [newPart, setNewPart] = useState({ name: "", make: "", model: "", year: "", price: "", quantity: "", sku: "", aliases: "", supplierId: "", image: null });
   const [apiError, setApiError] = useState("");
 
   const t = T[lang];
@@ -639,11 +641,11 @@ export default function App() {
       const res = await fetch(`${API_BASE}/parts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...newPart, aliases: aliasesArray, price: Number(newPart.price) }),
+        body: JSON.stringify({ ...newPart, aliases: aliasesArray, price: Number(newPart.price), quantity: Number(newPart.quantity) || 0 }),
       });
       const part = await res.json();
       setParts((prev) => [...prev, part]);
-      setNewPart({ name: "", make: "", model: "", year: "", price: "", sku: "", aliases: "", supplierId: suppliers[0]?.id || "", image: null });
+      setNewPart({ name: "", make: "", model: "", year: "", price: "", quantity: "", sku: "", aliases: "", supplierId: suppliers[0]?.id || "", image: null });
     } catch (e) {
       setApiError(t.apiOffline);
     }
@@ -731,8 +733,8 @@ export default function App() {
             ) : role === "supplier" ? (
               currentSupplier ? (
                 <SupplierDashboard
-                  t={t} lang={lang} screen={screen} setScreen={setScreen}
-                  supplier={currentSupplier}
+                  t={t} lang={lang} currency={currency} screen={screen} setScreen={setScreen}
+                  supplier={currentSupplier} parts={parts}
                   requests={supplierRequests.filter((r) => r.supplierId === currentSupplier.id)}
                   onSubmitRequest={submitSupplierRequest}
                   onResubmit={resubmitSupplierRequest}
@@ -1639,6 +1641,12 @@ function SupplierLogin({ t, onSuccess }) {
   );
 }
 
+function requestTypeLabel(t, type) {
+  if (type === "profile_update") return t.requestTypeProfile;
+  if (type === "update_part") return t.requestTypeUpdatePart;
+  return t.requestTypeNewPart;
+}
+
 function RequestStatusBadge({ t, status }) {
   const map = {
     pending: { label: t.reqPending, cls: "bg-slate-100 text-slate-600" },
@@ -1650,19 +1658,38 @@ function RequestStatusBadge({ t, status }) {
   return <span className={`text-xs px-2 py-1 rounded-full ${s.cls}`}>{s.label}</span>;
 }
 
-function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onSubmitRequest, onResubmit }) {
+function SupplierDashboard({ t, lang, currency, screen, setScreen, supplier, requests, parts, onSubmitRequest, onResubmit }) {
   const tabs = [
     { key: "myProfile", label: t.myProfileTab },
+    { key: "myProducts", label: t.myProductsTab },
     { key: "addPart", label: t.addPartTab },
     { key: "myRequests", label: t.myRequestsTab },
   ];
-  const activeTab = ["myProfile", "addPart", "myRequests"].includes(screen) ? screen : "myProfile";
+  const activeTab = ["myProfile", "myProducts", "addPart", "myRequests"].includes(screen) ? screen : "myProfile";
+  const myParts = (parts || []).filter((p) => p.supplierId === supplier.id);
+  const [editingPart, setEditingPart] = useState(null);
+  const [editPartForm, setEditPartForm] = useState(null);
+  const [productSent, setProductSent] = useState(null);
+
+  function startEditPart(p) {
+    setEditingPart(p);
+    setEditPartForm({ quantity: p.quantity !== undefined ? String(p.quantity) : "", price: String(p.price || ""), image: p.image || null });
+    setProductSent(null);
+  }
+
+  async function submitPartEdit() {
+    const ok = await onSubmitRequest("update_part", { partId: editingPart.id, ...editPartForm });
+    if (ok) {
+      setEditingPart(null);
+      setProductSent(editingPart.id);
+    }
+  }
 
   const [profileForm, setProfileForm] = useState({ name: L(supplier.name, lang), city: L(supplier.city, lang), phone: supplier.phone });
   const [profileSent, setProfileSent] = useState(false);
 
   const [partForm, setPartForm] = useState({
-    partName: "", partNumber: "", manufacturer: "", carType: "", carMake: "", year: "", cylinders: "", engineSize: "", price: "",
+    partName: "", partNumber: "", manufacturer: "", carType: "", carMake: "", year: "", cylinders: "", engineSize: "", price: "", quantity: "", image: null,
   });
   const [partError, setPartError] = useState("");
   const [partSent, setPartSent] = useState(false);
@@ -1686,7 +1713,7 @@ function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onS
     if (ok) {
       setPartSent(true);
       setPartError("");
-      setPartForm({ partName: "", partNumber: "", manufacturer: "", carType: "", carMake: "", year: "", cylinders: "", engineSize: "", price: "" });
+      setPartForm({ partName: "", partNumber: "", manufacturer: "", carType: "", carMake: "", year: "", cylinders: "", engineSize: "", price: "", quantity: "", image: null });
     }
   }
 
@@ -1740,6 +1767,60 @@ function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onS
           </div>
         )}
 
+        {activeTab === "myProducts" && (
+          <div className="space-y-2">
+            {myParts.length === 0 && <p className="text-sm text-slate-400 text-center py-8">{t.noMyProducts}</p>}
+            {myParts.map((p) => (
+              <div key={p.id} className="border border-slate-200 rounded-xl p-3 space-y-2 text-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+                    {p.image ? <img src={p.image} alt={L(p.name, lang)} className="w-full h-full object-cover" /> : <Package size={16} className="text-slate-300" />}
+                  </div>
+                  <div className="flex-1">
+                    <div>{L(p.name, lang)}</div>
+                    <div className="text-xs text-slate-400">{formatPrice(p.price, currency, lang)} · {t.quantityField}: {p.quantity ?? 0}</div>
+                  </div>
+                  <button onClick={() => startEditPart(p)} className="text-xs text-amber-600">{t.editBtn}</button>
+                </div>
+
+                {productSent === p.id && (
+                  <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-2 text-xs text-emerald-700">{t.requestSentNote}</div>
+                )}
+
+                {editingPart && editingPart.id === p.id && (
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <div>
+                      <label className="text-xs text-slate-500 block mb-1">{t.quantityField}</label>
+                      <input type="number" min="0" value={editPartForm.quantity} onChange={(e) => setEditPartForm({ ...editPartForm, quantity: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 block mb-1">{t.price}</label>
+                      <input type="number" value={editPartForm.price} onChange={(e) => setEditPartForm({ ...editPartForm, price: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 block mb-1">{t.uploadImage} <span className="text-slate-300">({t.optionalField})</span></label>
+                      <label className="w-full text-center block border border-dashed border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-500 cursor-pointer">
+                        {editPartForm.image ? t.changeImage : t.uploadFromDevice}
+                        <input
+                          type="file" accept="image/*" className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files && e.target.files[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = () => setEditPartForm((f) => ({ ...f, image: reader.result }));
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <button onClick={submitPartEdit} className="w-full bg-slate-900 text-white text-xs py-2 rounded-lg">{t.submitRequest}</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {activeTab === "addPart" && (
           <div className="space-y-2">
             {partSent && (
@@ -1759,6 +1840,31 @@ function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onS
               <label className="text-xs text-slate-500 block mb-1">{t.price}</label>
               <input type="number" value={partForm.price} onChange={(e) => setPartForm({ ...partForm, price: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
             </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">{t.quantityField}</label>
+              <input type="number" min="0" value={partForm.quantity} onChange={(e) => setPartForm({ ...partForm, quantity: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">{t.uploadImage} <span className="text-slate-300">({t.optionalField})</span></label>
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border border-slate-200">
+                  {partForm.image ? <img src={partForm.image} alt="" className="w-full h-full object-cover" /> : <Package size={18} className="text-slate-300" />}
+                </div>
+                <label className="flex-1 text-center border border-dashed border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-500 cursor-pointer">
+                  {partForm.image ? t.changeImage : t.uploadFromDevice}
+                  <input
+                    type="file" accept="image/*" className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files && e.target.files[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setPartForm((p) => ({ ...p, image: reader.result }));
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
             {partError && <p className="text-xs text-red-600">{partError}</p>}
             <button onClick={submitPart} className="w-full bg-amber-500 text-slate-900 text-sm py-2.5 rounded-lg font-medium mt-1">{t.submitRequest}</button>
           </div>
@@ -1773,7 +1879,7 @@ function SupplierDashboard({ t, lang, screen, setScreen, supplier, requests, onS
                   onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
                   className="w-full flex justify-between items-center text-start"
                 >
-                  <span className="text-xs font-medium">{r.type === "profile_update" ? t.requestTypeProfile : t.requestTypeNewPart}</span>
+                  <span className="text-xs font-medium">{requestTypeLabel(t, r.type)}</span>
                   <RequestStatusBadge t={t} status={r.status} />
                 </button>
                 <div className="text-xs text-slate-500">{r.date}</div>
@@ -1881,6 +1987,10 @@ function SupplierRequestsReview({ t, lang, requests, onReview }) {
     if (r.type === "profile_update") {
       return `${r.payload.name} · ${r.payload.city} · ${r.payload.phone}`;
     }
+    if (r.type === "update_part") {
+      const p = r.payload;
+      return `${t.quantityField}: ${p.quantity} · ${t.price}: ${p.price}${p.image ? ` · ${t.uploadImage}` : ""}`;
+    }
     const p = r.payload;
     return `${p.partName} (${p.partNumber}) · ${p.manufacturer} · ${p.carMake} ${p.carType} ${p.year} · ${p.cylinders}cyl ${p.engineSize}`;
   }
@@ -1894,7 +2004,7 @@ function SupplierRequestsReview({ t, lang, requests, onReview }) {
             <span className="text-xs font-medium">{L(r.supplierName, lang)}</span>
             <RequestStatusBadge t={t} status={r.status} />
           </div>
-          <div className="text-xs text-slate-500">{r.type === "profile_update" ? t.requestTypeProfile : t.requestTypeNewPart}</div>
+          <div className="text-xs text-slate-500">{requestTypeLabel(t, r.type)}</div>
           <div className="text-xs text-slate-600">{renderPayload(r)}</div>
           <div className="text-xs text-slate-400">{r.date}</div>
           {r.status === "pending" && (
@@ -2112,6 +2222,7 @@ function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppl
                 <input placeholder={t.years} value={newPart.year} onChange={(e) => setNewPart({ ...newPart, year: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
                 <input placeholder={t.price} type="number" value={newPart.price} onChange={(e) => setNewPart({ ...newPart, price: e.target.value })} className="border border-slate-300 rounded-lg px-3 py-2 text-sm" />
               </div>
+              <input placeholder={t.quantityField} type="number" min="0" value={newPart.quantity} onChange={(e) => setNewPart({ ...newPart, quantity: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
               <input placeholder={t.searchPartNumber} value={newPart.sku} onChange={(e) => setNewPart({ ...newPart, sku: e.target.value })} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
               <div>
                 <input
