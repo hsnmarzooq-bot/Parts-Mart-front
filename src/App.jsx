@@ -582,6 +582,17 @@ export default function App() {
     }
   }
 
+  async function deleteSupplier(id) {
+    try {
+      const res = await fetch(`${API_BASE}/suppliers/${id}`, { method: "DELETE" });
+      if (!res.ok) return false;
+      setSuppliers((prev) => prev.filter((s) => s.id !== id));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function submitSupplierRequest(type, payload) {
     try {
       const res = await fetch(`${API_BASE}/supplier-requests`, {
@@ -750,7 +761,7 @@ export default function App() {
                 orders={orders} onAdvance={advanceOrderStatus}
                 newPart={newPart} setNewPart={setNewPart} onAddPart={addPart}
                 newSupplier={newSupplier} setNewSupplier={setNewSupplier}
-                onAddSupplier={addSupplier} supplierError={supplierError} onUpdateSupplier={updateSupplier}
+                onAddSupplier={addSupplier} supplierError={supplierError} onUpdateSupplier={updateSupplier} onDeleteSupplier={deleteSupplier}
                 partRequests={partRequests} onMarkFulfilled={markRequestFulfilled}
                 supplierRequests={supplierRequests} onReviewSupplierRequest={reviewSupplierRequest}
                 photoRequests={photoRequests} onSendToSuppliers={sendPhotoRequestToSuppliers}
@@ -2116,7 +2127,7 @@ function PhotoRequestsAdmin({ t, lang, requests, suppliers, onSendToSuppliers })
   );
 }
 
-function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppliers, parts, orders, onAdvance, newPart, setNewPart, onAddPart, newSupplier, setNewSupplier, onAddSupplier, supplierError, partRequests, onMarkFulfilled, supplierRequests, onReviewSupplierRequest, photoRequests, onSendToSuppliers, onUpdateSupplier }) {
+function AdminDashboard({ t, lang, currency, screen, setScreen, customers, suppliers, parts, orders, onAdvance, newPart, setNewPart, onAddPart, newSupplier, setNewSupplier, onAddSupplier, supplierError, partRequests, onMarkFulfilled, supplierRequests, onReviewSupplierRequest, photoRequests, onSendToSuppliers, onUpdateSupplier, onDeleteSupplier }) {
   const tabs = [
     { key: "overview", label: t.overview, icon: LayoutDashboard },
     { key: "orders", label: t.ordersTab, icon: ClipboardList },
