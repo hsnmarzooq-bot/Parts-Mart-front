@@ -153,6 +153,7 @@ const T = {
     noOrders: "لا توجد طلبات حتى الآن",
     loginToViewOrders: "سجّل الدخول لعرض طلباتك",
     allModels: "كل الموديلات", pickMakeFirst: "اختر النوع أولًا",
+    otherMake: "أخرى (اكتب النوع)", otherModel: "أخرى (اكتب الموديل)", typeMakePh: "اكتب نوع السيارة", typeModelPh: "اكتب الموديل", backToList: "الرجوع للقائمة",
     loginRequiredNote: "سجّل الدخول للمتابعة إلى السلة أو الطلبات", partsCount: (n) => `${n} قطعة`,
     overview: "نظرة عامة", ordersTab: "الطلبات", partsTab: "القطع", suppliersTab: "الموردون", customersTab: "العملاء",
     totalCommission: "إجمالي العمولات", totalSales: "إجمالي المبيعات", suppliersCount: "الموردون",
@@ -246,6 +247,7 @@ const T = {
     noOrders: "No orders yet",
     loginToViewOrders: "Log in to view your orders",
     allModels: "All models", pickMakeFirst: "Select make first",
+    otherMake: "Other (type make)", otherModel: "Other (type model)", typeMakePh: "Type the car make", typeModelPh: "Type the model", backToList: "Back to list",
     loginRequiredNote: "Log in to continue to your cart or orders", partsCount: (n) => `${n} item(s)`,
     overview: "Overview", ordersTab: "Orders", partsTab: "Parts", suppliersTab: "Suppliers", customersTab: "Customers",
     totalCommission: "Total commissions", totalSales: "Total sales", suppliersCount: "Suppliers",
@@ -1193,6 +1195,8 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
   const [imageError, setImageError] = useState("");
   const [vinLoading, setVinLoading] = useState(false);
   const [vinError, setVinError] = useState("");
+  const [customMake, setCustomMake] = useState(false);
+  const [customModel, setCustomModel] = useState(false);
   const [reqForm, setReqForm] = useState({ partName: "", carType: "", year: "", name: "", phone: "", email: "" });
   const [reqError, setReqError] = useState("");
   const [reqSubmitted, setReqSubmitted] = useState(false);
@@ -1421,38 +1425,85 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
         <div className="grid grid-cols-2 gap-2">
           {fields.map(({ key, label }) => {
             if (key === "carMake") {
-              const known = !!findMake(search.carMake);
+              const makeIsCustom = customMake || (!!search.carMake && !findMake(search.carMake));
               return (
                 <div key={key}>
                   <label className="text-xs text-slate-500 block mb-1">{label}</label>
                   <select
-                    value={search.carMake}
-                    onChange={(e) => { setSearch((prev) => ({ ...prev, carMake: e.target.value, carModel: "" })); setReqSubmitted(false); }}
+                    value={makeIsCustom ? "__other__" : search.carMake}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setCustomModel(false);
+                      setReqSubmitted(false);
+                      if (v === "__other__") {
+                        setCustomMake(true);
+                        setSearch((prev) => ({ ...prev, carMake: "", carModel: "" }));
+                      } else {
+                        setCustomMake(false);
+                        setSearch((prev) => ({ ...prev, carMake: v, carModel: "" }));
+                      }
+                    }}
                     className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
                   >
                     <option value="">{t.allMakes}</option>
                     {CAR_DATA.map((m) => <option key={m.en} value={m.en}>{lang === "ar" ? m.ar : m.en}</option>)}
-                    {search.carMake && !known && <option value={search.carMake}>{search.carMake}</option>}
+                    <option value="__other__">{t.otherMake}</option>
                   </select>
+                  {makeIsCustom && (
+                    <input
+                      value={search.carMake}
+                      onChange={(e) => updateField("carMake", e.target.value)}
+                      placeholder={t.typeMakePh}
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm mt-1.5"
+                    />
+                  )}
                 </div>
               );
             }
             if (key === "carModel") {
               const make = findMake(search.carMake);
               const inList = !!make && make.models.some(([en]) => en === search.carModel);
+              const modelIsText = !make || customModel || (!!search.carModel && !inList);
               return (
                 <div key={key}>
                   <label className="text-xs text-slate-500 block mb-1">{label}</label>
-                  <select
-                    value={search.carModel}
-                    disabled={!search.carMake}
-                    onChange={(e) => updateField("carModel", e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white disabled:bg-slate-50 disabled:text-slate-400"
-                  >
-                    <option value="">{search.carMake ? t.allModels : t.pickMakeFirst}</option>
-                    {make && make.models.map(([en, ar]) => <option key={en} value={en}>{lang === "ar" ? ar : en}</option>)}
-                    {search.carModel && !inList && <option value={search.carModel}>{search.carModel}</option>}
-                  </select>
+                  {modelIsText ? (
+                    <>
+                      <input
+                        value={search.carModel}
+                        disabled={!search.carMake}
+                        onChange={(e) => updateField("carModel", e.target.value)}
+                        placeholder={search.carMake ? t.typeModelPh : t.pickMakeFirst}
+                        className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-400"
+                      />
+                      {make && (
+                        <button
+                          onClick={() => { setCustomModel(false); setSearch((prev) => ({ ...prev, carModel: "" })); }}
+                          className="text-xs text-amber-600 mt-1"
+                        >
+                          {t.backToList}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <select
+                      value={search.carModel}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "__other__") {
+                          setCustomModel(true);
+                          setSearch((prev) => ({ ...prev, carModel: "" }));
+                        } else {
+                          updateField("carModel", v);
+                        }
+                      }}
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
+                    >
+                      <option value="">{t.allModels}</option>
+                      {make.models.map(([en, ar]) => <option key={en} value={en}>{lang === "ar" ? ar : en}</option>)}
+                      <option value="__other__">{t.otherModel}</option>
+                    </select>
+                  )}
                 </div>
               );
             }
