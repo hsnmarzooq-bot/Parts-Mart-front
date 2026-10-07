@@ -10,7 +10,7 @@ const API_BASE = "https://parts-mart-backend-production-cac5.up.railway.app/api"
 
 const T = {
   ar: {
-    appName: "Parts Mart", customerTab: "العميل", adminTab: "الإدارة", supplierTab: "المورد",
+    appName: "آمر", customerTab: "العميل", adminTab: "الإدارة", supplierTab: "المورد",
     supplierLoginTitle: "تسجيل دخول المورد", supplierLoginNote: "بيانات الدخول هذه تُعطى للمورد ليستخدمها في بوابته الخاصة",
     myProfileTab: "بياناتي", myProductsTab: "منتجاتي", addPartTab: "إضافة قطعة", myRequestsTab: "طلباتي",
     noMyProducts: "لا توجد قطع مسجَّلة باسمك حاليًا", requestTypeUpdatePart: "تعديل قطعة",
@@ -60,7 +60,7 @@ const T = {
     requestPartTitle: "اطلب توفير هذه القطعة", requestPartName: "اسم القطعة", requestCarType: "نوع السيارة",
     requestYear: "سنة الصنع", requestCustomerName: "اسمك", requestPhone: "رقم الهاتف",
     requestEmail: "البريد الإلكتروني", submitRequest: "إرسال الطلب",
-    requestSuccessMsg: "تم استلام طلبك، وسنُعلمك فور توفير القطعة.",
+    requestSuccessMsg: "تم استلام طلبك، وسيتم التواصل معك عبر الواتساب.",
     requestFillFields: "الرجاء تعبئة جميع الحقول",
     partRequestsTab: "طلبات ناقصة", noPartRequests: "لا توجد طلبات قطع غير متوفرة حالياً",
     photoRequestsTab: "طلبات التصوير", noPhotoRequests: "لا توجد طلبات تصوير حتى الآن",
@@ -76,7 +76,9 @@ const T = {
     emptyCart: "سلتك فارغة حالياً", browseParts: "تصفّح القطع", total: "الإجمالي",
     confirmOrder: "تأكيد الطلب", loginToOrder: "سجّل الدخول لإتمام الطلب",
     paymentNote: "الدفع الإلكتروني سيُفعّل في مرحلة لاحقة — الطلب يُسجَّل الآن كطلب مبدئي",
-    noOrders: "لا توجد طلبات حتى الآن", partsCount: (n) => `${n} قطعة`,
+    noOrders: "لا توجد طلبات حتى الآن",
+    loginToViewOrders: "سجّل الدخول لعرض طلباتك",
+    loginRequiredNote: "سجّل الدخول للمتابعة إلى السلة أو الطلبات", partsCount: (n) => `${n} قطعة`,
     overview: "نظرة عامة", ordersTab: "الطلبات", partsTab: "القطع", suppliersTab: "الموردون", customersTab: "العملاء",
     totalCommission: "إجمالي العمولات", totalSales: "إجمالي المبيعات", suppliersCount: "الموردون",
     availableParts: "القطع المتاحة", customersCount: "العملاء", ongoingOrders: "طلبات جارية",
@@ -100,7 +102,7 @@ const T = {
     stages: ["قيد المراجعة", "تم التأكيد", "تم الشحن", "تم التسليم"],
   },
   en: {
-    appName: "Parts Mart", customerTab: "Customer", adminTab: "Admin", supplierTab: "Supplier",
+    appName: "Amer", customerTab: "Customer", adminTab: "Admin", supplierTab: "Supplier",
     supplierLoginTitle: "Supplier Login", supplierLoginNote: "These login details are given to the supplier for their own portal",
     myProfileTab: "My Profile", myProductsTab: "My Products", addPartTab: "Add Part", myRequestsTab: "My Requests",
     noMyProducts: "You don't have any listed parts yet", requestTypeUpdatePart: "Part update",
@@ -150,7 +152,7 @@ const T = {
     requestPartTitle: "Request this part", requestPartName: "Part name", requestCarType: "Car type",
     requestYear: "Year of manufacture", requestCustomerName: "Your name", requestPhone: "Phone number",
     requestEmail: "Email", submitRequest: "Submit request",
-    requestSuccessMsg: "Your request has been received. We'll notify you once the part is available.",
+    requestSuccessMsg: "Your request has been received. We'll contact you via WhatsApp.",
     requestFillFields: "Please fill in all fields",
     partRequestsTab: "Missing requests", noPartRequests: "No unavailable-part requests yet",
     photoRequestsTab: "Photo Requests", noPhotoRequests: "No photo requests yet",
@@ -166,7 +168,9 @@ const T = {
     emptyCart: "Your cart is empty", browseParts: "Browse parts", total: "Total",
     confirmOrder: "Confirm order", loginToOrder: "Sign in to complete order",
     paymentNote: "Online payment will be enabled in a later phase — this order is now recorded as a preliminary request",
-    noOrders: "No orders yet", partsCount: (n) => `${n} item(s)`,
+    noOrders: "No orders yet",
+    loginToViewOrders: "Log in to view your orders",
+    loginRequiredNote: "Log in to continue to your cart or orders", partsCount: (n) => `${n} item(s)`,
     overview: "Overview", ordersTab: "Orders", partsTab: "Parts", suppliersTab: "Suppliers", customersTab: "Customers",
     totalCommission: "Total commissions", totalSales: "Total sales", suppliersCount: "Suppliers",
     availableParts: "Available parts", customersCount: "Customers", ongoingOrders: "Ongoing orders",
@@ -298,6 +302,18 @@ export default function App() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [pendingScreen, setPendingScreen] = useState(null);
+
+  // Cart and My Orders require an account: send guests to login, then bring them back to where they were heading.
+  function goTo(key) {
+    if ((key === "cart" || key === "orders") && !currentUser) {
+      setPendingScreen(key);
+      setScreen("login");
+    } else {
+      setPendingScreen(null);
+      setScreen(key);
+    }
+  }
   const [newPart, setNewPart] = useState({ name: "", make: "", model: "", year: "", price: "", quantity: "", sku: "", aliases: "", supplierId: "", image: null });
   const [apiError, setApiError] = useState("");
 
@@ -401,7 +417,8 @@ export default function App() {
       setCustomers((prev) => [...prev, user]);
       setCurrentUser(user);
       setRegError("");
-      setScreen("home");
+      setScreen(pendingScreen || "home");
+      setPendingScreen(null);
     } catch (e) {
       setRegError(t.apiOffline);
     }
@@ -429,7 +446,8 @@ export default function App() {
       const user = await res.json();
       setCurrentUser(user);
       setLoginError("");
-      setScreen("home");
+      setScreen(pendingScreen || "home");
+      setPendingScreen(null);
     } catch (e) {
       setLoginError(t.apiOffline);
     }
@@ -455,6 +473,7 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          customerId: currentUser ? currentUser.id : null,
           customerName: currentUser ? currentUser.name : { ar: "زائر", en: "Guest" },
           items: cart,
           vin: vin || null,
@@ -712,7 +731,7 @@ export default function App() {
             isDesktop={isDesktop}
           />
           {role === "customer" && isDesktop && (
-            <SidebarNav t={t} lang={lang} screen={screen} setScreen={setScreen} cartCount={cartCount} />
+            <SidebarNav t={t} lang={lang} screen={screen} setScreen={goTo} cartCount={cartCount} />
           )}
         </div>
 
@@ -726,10 +745,10 @@ export default function App() {
             {role === "customer" ? (
               <>
                 {screen === "home" && (
-                  <Home t={t} lang={lang} currentUser={currentUser} onSearch={() => setScreen("search")} onRegister={() => setScreen("login")} onLogout={() => setCurrentUser(null)} onSnapSend={() => setScreen("photoRequest")} />
+                  <Home t={t} lang={lang} currentUser={currentUser} onSearch={() => setScreen("search")} onRegister={() => { setPendingScreen(null); setScreen("login"); }} onLogout={() => setCurrentUser(null)} onSnapSend={() => setScreen("photoRequest")} />
                 )}
                 {screen === "login" && (
-                  <Login t={t} loginForm={loginForm} setLoginForm={setLoginForm} error={loginError} onSubmit={submitLogin} onGoToRegister={() => setScreen("register")} onResend={resendVerification} />
+                  <Login notice={pendingScreen ? t.loginRequiredNote : ""} t={t} loginForm={loginForm} setLoginForm={setLoginForm} error={loginError} onSubmit={submitLogin} onGoToRegister={() => setScreen("register")} onResend={resendVerification} />
                 )}
                 {screen === "checkEmail" && (
                   <CheckEmail t={t} email={registeredEmail} onBackToLogin={() => setScreen("login")} />
@@ -751,7 +770,7 @@ export default function App() {
                   />
                 )}
                 {screen === "detail" && selectedPart && (
-                  <PartDetail t={t} lang={lang} currency={currency} part={selectedPart} onBack={() => setScreen("search")} onAdd={() => { addToCart(selectedPart); setScreen("cart"); }} />
+                  <PartDetail t={t} lang={lang} currency={currency} part={selectedPart} onBack={() => setScreen("search")} onAdd={() => { addToCart(selectedPart); goTo("cart"); }} />
                 )}
                 {screen === "cart" && (
                   <CartScreen
@@ -764,7 +783,9 @@ export default function App() {
                 )}
                 {screen === "orders" && (
                   <OrdersScreen
-                    t={t} lang={lang} currency={currency} orders={orders}
+                    t={t} lang={lang} currency={currency}
+                    currentUser={currentUser} onLogin={() => setScreen("login")}
+                    orders={currentUser ? orders.filter((o) => o.customerId === currentUser.id) : []}
                     photoRequests={currentUser ? photoRequests.filter((r) => r.customerId === currentUser.id) : []}
                   />
                 )}
@@ -800,7 +821,7 @@ export default function App() {
           </div>
 
           {role === "customer" && !isDesktop && (
-            <BottomNav t={t} screen={screen} setScreen={setScreen} cartCount={cartCount} />
+            <BottomNav t={t} screen={screen} setScreen={goTo} cartCount={cartCount} />
           )}
         </div>
       </div>
@@ -968,10 +989,11 @@ function Home({ t, lang, currentUser, onSearch, onRegister, onLogout, onSnapSend
   );
 }
 
-function Login({ t, loginForm, setLoginForm, error, onSubmit, onGoToRegister, onResend }) {
+function Login({ t, loginForm, setLoginForm, error, onSubmit, onGoToRegister, onResend, notice }) {
   return (
     <div className="p-5 space-y-4">
       <h2 className="text-base font-medium">{t.loginTitle}</h2>
+      {notice && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{notice}</p>}
       <div className="space-y-3">
         <div>
           <label className="text-xs text-slate-500 block mb-1">{t.username}</label>
@@ -1572,7 +1594,16 @@ function CartScreen({ t, lang, currency, cart, total, onQty, onRemove, onCheckou
   );
 }
 
-function OrdersScreen({ t, lang, currency, orders, photoRequests }) {
+function OrdersScreen({ t, lang, currency, orders, photoRequests, currentUser, onLogin }) {
+  if (!currentUser) {
+    return (
+      <div className="p-8 text-center space-y-3">
+        <ClipboardList size={32} className="mx-auto text-slate-300" />
+        <p className="text-sm text-slate-500">{t.loginToViewOrders}</p>
+        <button onClick={onLogin} className="bg-amber-500 text-slate-900 text-sm px-5 py-2 rounded-lg font-medium">{t.loginBtn}</button>
+      </div>
+    );
+  }
   if (orders.length === 0 && (!photoRequests || photoRequests.length === 0)) {
     return <p className="text-sm text-slate-400 text-center py-10">{t.noOrders}</p>;
   }
