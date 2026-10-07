@@ -8,6 +8,80 @@ import {
 const BHD_PER_SAR = 0.0997; // approximate peg-based rate, base prices are stored in SAR
 const API_BASE = "https://parts-mart-backend-production-cac5.up.railway.app/api"; // deployed backend on Railway
 
+// Car makes and their models (canonical English name + Arabic name) — used by the search dropdowns.
+const CAR_DATA = [
+  { en: "Toyota", ar: "تويوتا", models: [["Camry","كامري"],["Corolla","كورولا"],["Land Cruiser","لاند كروزر"],["Prado","برادو"],["Hilux","هايلكس"],["Yaris","يارس"],["RAV4","راف فور"],["Fortuner","فورتشنر"],["Avalon","أفالون"],["Innova","إنوفا"],["Hiace","هايس"],["Rush","راش"],["Crown","كراون"],["Sequoia","سيكويا"]] },
+  { en: "Nissan", ar: "نيسان", models: [["Altima","التيما"],["Sunny","صني"],["Patrol","باترول"],["Maxima","ماكسيما"],["Sentra","سنترا"],["X-Trail","إكس تريل"],["Pathfinder","باثفايندر"],["Kicks","كيكس"],["Navara","نافارا"],["Tiida","تيدا"],["Armada","أرمادا"],["Juke","جوك"]] },
+  { en: "Honda", ar: "هوندا", models: [["Accord","أكورد"],["Civic","سيفيك"],["CR-V","سي آر في"],["City","سيتي"],["Pilot","بايلوت"],["Odyssey","أوديسي"],["HR-V","إتش آر في"],["Jazz","جاز"]] },
+  { en: "Mazda", ar: "مازدا", models: [["Mazda 2","مازدا 2"],["Mazda 3","مازدا 3"],["Mazda 6","مازدا 6"],["CX-3","سي إكس 3"],["CX-5","سي إكس 5"],["CX-9","سي إكس 9"],["CX-30","سي إكس 30"]] },
+  { en: "Mitsubishi", ar: "ميتسوبيشي", models: [["Lancer","لانسر"],["Pajero","باجيرو"],["L200","إل 200"],["Outlander","أوتلاندر"],["ASX","إيه إس إكس"],["Attrage","أتراج"],["Eclipse Cross","إكليبس كروس"],["Montero","مونتيرو"]] },
+  { en: "Hyundai", ar: "هيونداي", models: [["Elantra","إلنترا"],["Sonata","سوناتا"],["Accent","أكسنت"],["Tucson","توسان"],["Santa Fe","سنتافي"],["Azera","أزيرا"],["Creta","كريتا"],["Palisade","باليسيد"],["Kona","كونا"]] },
+  { en: "Kia", ar: "كيا", models: [["Optima","أوبتيما"],["Cerato","سيراتو"],["Sportage","سبورتاج"],["Sorento","سورينتو"],["Rio","ريو"],["Picanto","بيكانتو"],["Seltos","سيلتوس"],["Carnival","كرنفال"]] },
+  { en: "Lexus", ar: "لكزس", models: [["ES","إي إس"],["LS","إل إس"],["IS","آي إس"],["RX","آر إكس"],["NX","إن إكس"],["GX","جي إكس"],["LX","إل إكس"]] },
+  { en: "Ford", ar: "فورد", models: [["Mustang","موستنج"],["Explorer","إكسبلورر"],["Expedition","إكسبيديشن"],["F-150","إف 150"],["Edge","إيدج"],["Taurus","توروس"],["Focus","فوكس"],["Fusion","فيوجن"],["Ranger","رينجر"]] },
+  { en: "Chevrolet", ar: "شفروليه", models: [["Tahoe","تاهو"],["Suburban","سوبربان"],["Silverado","سيلفرادو"],["Malibu","ماليبو"],["Cruze","كروز"],["Camaro","كامارو"],["Captiva","كابتيفا"],["Traverse","ترافيرس"],["Impala","إمبالا"]] },
+  { en: "GMC", ar: "جي إم سي", models: [["Yukon","يوكن"],["Sierra","سييرا"],["Acadia","أكاديا"],["Terrain","تيرين"]] },
+  { en: "Dodge", ar: "دودج", models: [["Charger","تشارجر"],["Challenger","تشالنجر"],["Durango","دورانجو"],["Ram","رام"]] },
+  { en: "Jeep", ar: "جيب", models: [["Wrangler","رانجلر"],["Grand Cherokee","جراند شيروكي"],["Cherokee","شيروكي"],["Compass","كومباس"]] },
+  { en: "Mercedes-Benz", ar: "مرسيدس", models: [["A-Class","الفئة A"],["C-Class","الفئة C"],["E-Class","الفئة E"],["S-Class","الفئة S"],["CLA","سي إل إيه"],["GLC","جي إل سي"],["GLE","جي إل إي"],["GLS","جي إل إس"],["G-Class","الفئة G"]] },
+  { en: "BMW", ar: "بي إم دبليو", models: [["3 Series","الفئة 3"],["5 Series","الفئة 5"],["7 Series","الفئة 7"],["X1","إكس 1"],["X3","إكس 3"],["X5","إكس 5"],["X6","إكس 6"]] },
+  { en: "Audi", ar: "أودي", models: [["A3","إيه 3"],["A4","إيه 4"],["A6","إيه 6"],["A8","إيه 8"],["Q3","كيو 3"],["Q5","كيو 5"],["Q7","كيو 7"]] },
+  { en: "Volkswagen", ar: "فولكسفاجن", models: [["Golf","جولف"],["Passat","باسات"],["Tiguan","تيجوان"],["Touareg","طوارق"],["Jetta","جيتا"],["Polo","بولو"]] },
+  { en: "Infiniti", ar: "إنفينيتي", models: [["Q50","كيو 50"],["QX50","كيو إكس 50"],["QX60","كيو إكس 60"],["QX80","كيو إكس 80"]] },
+  { en: "Suzuki", ar: "سوزوكي", models: [["Swift","سويفت"],["Dzire","ديزاير"],["Vitara","فيتارا"],["Ertiga","إرتيغا"],["Jimny","جمني"],["Ciaz","سياز"]] },
+  { en: "Isuzu", ar: "إيسوزو", models: [["D-Max","دي ماكس"],["MU-X","إم يو إكس"]] },
+  { en: "Land Rover", ar: "لاند روفر", models: [["Range Rover","رينج روفر"],["Defender","ديفندر"],["Discovery","ديسكفري"],["Evoque","إيفوك"]] },
+  { en: "MG", ar: "إم جي", models: [["MG5","إم جي 5"],["MG6","إم جي 6"],["ZS","زد إس"],["HS","إتش إس"],["RX8","آر إكس 8"]] },
+  { en: "Geely", ar: "جيلي", models: [["Emgrand","إمجراند"],["Coolray","كولراي"],["Azkarra","أزكارا"]] },
+  { en: "Chery", ar: "شيري", models: [["Tiggo 4","تيجو 4"],["Tiggo 7","تيجو 7"],["Tiggo 8","تيجو 8"],["Arrizo","أريزو"]] },
+];
+
+function normText(s) {
+  return String(s || "").toLowerCase()
+    .replace(/[\u064B-\u0652\u0640]/g, "")
+    .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
+    .replace(/[\s\-_.]/g, "");
+}
+function findMake(value) {
+  const n = normText(value);
+  if (!n) return null;
+  return CAR_DATA.find((m) => normText(m.en) === n || normText(m.ar) === n) || null;
+}
+// Turn free text (voice / photo / VIN result, in Arabic or English) into the canonical make name when we recognise it.
+function resolveMake(text) {
+  const n = normText(text);
+  if (!n) return "";
+  const exact = findMake(text);
+  if (exact) return exact.en;
+  if (n.length >= 3) {
+    const partial = CAR_DATA.find((m) => n.includes(normText(m.en)) || n.includes(normText(m.ar)));
+    if (partial) return partial.en;
+  }
+  return String(text).trim();
+}
+function resolveModel(makeEn, text) {
+  const n = normText(text);
+  if (!n) return "";
+  const make = findMake(makeEn);
+  if (make) {
+    const exact = make.models.find(([en, ar]) => normText(en) === n || normText(ar) === n);
+    if (exact) return exact[0];
+    const partial = make.models.find(([en, ar]) => (normText(en).length >= 3 && n.includes(normText(en))) || (normText(ar).length >= 3 && n.includes(normText(ar))));
+    if (partial) return partial[0];
+  }
+  return String(text).trim();
+}
+// Names in the current UI language — the backend matches against the part's make/model in that language.
+function makeLabel(value, lang) {
+  const m = findMake(value);
+  return m ? (lang === "ar" ? m.ar : m.en) : value;
+}
+function modelLabel(makeValue, modelValue, lang) {
+  const make = findMake(makeValue);
+  const hit = make && make.models.find(([en]) => en === modelValue);
+  return hit ? (lang === "ar" ? hit[1] : hit[0]) : modelValue;
+}
+
 const T = {
   ar: {
     appName: "آمر", customerTab: "العميل", adminTab: "الإدارة", supplierTab: "المورد",
@@ -78,6 +152,7 @@ const T = {
     paymentNote: "الدفع الإلكتروني سيُفعّل في مرحلة لاحقة — الطلب يُسجَّل الآن كطلب مبدئي",
     noOrders: "لا توجد طلبات حتى الآن",
     loginToViewOrders: "سجّل الدخول لعرض طلباتك",
+    allModels: "كل الموديلات", pickMakeFirst: "اختر النوع أولًا",
     loginRequiredNote: "سجّل الدخول للمتابعة إلى السلة أو الطلبات", partsCount: (n) => `${n} قطعة`,
     overview: "نظرة عامة", ordersTab: "الطلبات", partsTab: "القطع", suppliersTab: "الموردون", customersTab: "العملاء",
     totalCommission: "إجمالي العمولات", totalSales: "إجمالي المبيعات", suppliersCount: "الموردون",
@@ -170,6 +245,7 @@ const T = {
     paymentNote: "Online payment will be enabled in a later phase — this order is now recorded as a preliminary request",
     noOrders: "No orders yet",
     loginToViewOrders: "Log in to view your orders",
+    allModels: "All models", pickMakeFirst: "Select make first",
     loginRequiredNote: "Log in to continue to your cart or orders", partsCount: (n) => `${n} item(s)`,
     overview: "Overview", ordersTab: "Orders", partsTab: "Parts", suppliersTab: "Suppliers", customersTab: "Customers",
     totalCommission: "Total commissions", totalSales: "Total sales", suppliersCount: "Suppliers",
@@ -359,7 +435,7 @@ export default function App() {
   // Re-query the backend's search endpoint (server-side fuzzy matching) whenever the customer's search changes.
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const params = new URLSearchParams({ ...search, lang });
+      const params = new URLSearchParams({ ...search, carMake: makeLabel(search.carMake, lang), carModel: modelLabel(search.carMake, search.carModel, lang), lang });
       fetch(`${API_BASE}/parts?${params.toString()}`)
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error("search failed"))))
         .then((data) => setSearchResults(Array.isArray(data) ? data : []))
@@ -1132,7 +1208,7 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
 
   function submitRequest() {
     const partNameDefault = reqForm.partName || search.partName;
-    const carTypeDefault = reqForm.carType || `${search.carMake} ${search.carModel}`.trim();
+    const carTypeDefault = reqForm.carType || `${makeLabel(search.carMake, lang)} ${modelLabel(search.carMake, search.carModel, lang)}`.trim();
     const yearDefault = reqForm.year || search.year;
     const { name, phone, email } = reqForm;
     if (!partNameDefault.trim() || !carTypeDefault.trim() || !yearDefault.trim() || !name.trim() || !phone.trim() || !email.trim()) {
@@ -1155,13 +1231,16 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
       });
       if (!response.ok) throw new Error("ai parse failed");
       const parsed = await response.json();
-      setSearch((prev) => ({
-        partName: parsed.partName || prev.partName,
-        carMake: parsed.carMake || prev.carMake,
-        carModel: parsed.carModel || prev.carModel,
-        year: parsed.year || prev.year,
-        partNumber: parsed.partNumber || prev.partNumber,
-      }));
+      setSearch((prev) => {
+        const nextMake = parsed.carMake ? resolveMake(parsed.carMake) : prev.carMake;
+        return {
+          partName: parsed.partName || prev.partName,
+          carMake: nextMake,
+          carModel: parsed.carModel ? resolveModel(nextMake, parsed.carModel) : (nextMake !== prev.carMake ? "" : prev.carModel),
+          year: parsed.year || prev.year,
+          partNumber: parsed.partNumber || prev.partNumber,
+        };
+      });
     } catch (err) {
       setVoiceError(t.aiError);
     } finally {
@@ -1219,13 +1298,16 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
       });
       if (!response.ok) throw new Error("ai identify failed");
       const parsed = await response.json();
-      setSearch((prev) => ({
-        partName: parsed.partName || prev.partName,
-        carMake: parsed.carMake || prev.carMake,
-        carModel: parsed.carModel || prev.carModel,
-        year: parsed.year || prev.year,
-        partNumber: parsed.partNumber || prev.partNumber,
-      }));
+      setSearch((prev) => {
+        const nextMake = parsed.carMake ? resolveMake(parsed.carMake) : prev.carMake;
+        return {
+          partName: parsed.partName || prev.partName,
+          carMake: nextMake,
+          carModel: parsed.carModel ? resolveModel(nextMake, parsed.carModel) : (nextMake !== prev.carMake ? "" : prev.carModel),
+          year: parsed.year || prev.year,
+          partNumber: parsed.partNumber || prev.partNumber,
+        };
+      });
     } catch (err) {
       setImageError(t.aiImageError);
     } finally {
@@ -1253,12 +1335,15 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
       if (!response.ok) throw new Error("vin decode failed");
       const info = await response.json();
       setVinInfo(info);
-      setSearch((prev) => ({
-        ...prev,
-        carMake: info.make || prev.carMake,
-        carModel: info.model || prev.carModel,
-        year: info.year || prev.year,
-      }));
+      setSearch((prev) => {
+        const nextMake = info.make ? resolveMake(info.make) : prev.carMake;
+        return {
+          ...prev,
+          carMake: nextMake,
+          carModel: info.model ? resolveModel(nextMake, info.model) : (nextMake !== prev.carMake ? "" : prev.carModel),
+          year: info.year || prev.year,
+        };
+      });
     } catch (err) {
       setVinError(t.vinError);
     } finally {
@@ -1334,16 +1419,54 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {fields.map(({ key, label }) => (
-            <div key={key} className={key === "partNumber" || key === "partName" ? "col-span-2" : ""}>
-              <label className="text-xs text-slate-500 block mb-1">{label}</label>
-              <input
-                value={search[key]}
-                onChange={(e) => updateField(key, e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-          ))}
+          {fields.map(({ key, label }) => {
+            if (key === "carMake") {
+              const known = !!findMake(search.carMake);
+              return (
+                <div key={key}>
+                  <label className="text-xs text-slate-500 block mb-1">{label}</label>
+                  <select
+                    value={search.carMake}
+                    onChange={(e) => { setSearch((prev) => ({ ...prev, carMake: e.target.value, carModel: "" })); setReqSubmitted(false); }}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
+                  >
+                    <option value="">{t.allMakes}</option>
+                    {CAR_DATA.map((m) => <option key={m.en} value={m.en}>{lang === "ar" ? m.ar : m.en}</option>)}
+                    {search.carMake && !known && <option value={search.carMake}>{search.carMake}</option>}
+                  </select>
+                </div>
+              );
+            }
+            if (key === "carModel") {
+              const make = findMake(search.carMake);
+              const inList = !!make && make.models.some(([en]) => en === search.carModel);
+              return (
+                <div key={key}>
+                  <label className="text-xs text-slate-500 block mb-1">{label}</label>
+                  <select
+                    value={search.carModel}
+                    disabled={!search.carMake}
+                    onChange={(e) => updateField("carModel", e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white disabled:bg-slate-50 disabled:text-slate-400"
+                  >
+                    <option value="">{search.carMake ? t.allModels : t.pickMakeFirst}</option>
+                    {make && make.models.map(([en, ar]) => <option key={en} value={en}>{lang === "ar" ? ar : en}</option>)}
+                    {search.carModel && !inList && <option value={search.carModel}>{search.carModel}</option>}
+                  </select>
+                </div>
+              );
+            }
+            return (
+              <div key={key} className={key === "partNumber" || key === "partName" ? "col-span-2" : ""}>
+                <label className="text-xs text-slate-500 block mb-1">{label}</label>
+                <input
+                  value={search[key]}
+                  onChange={(e) => updateField(key, e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -1370,7 +1493,7 @@ function SearchScreen({ t, lang, currency, search, setSearch, parts, hasActiveSe
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     placeholder={t.requestCarType}
-                    value={reqForm.carType || `${search.carMake} ${search.carModel}`.trim()}
+                    value={reqForm.carType || `${makeLabel(search.carMake, lang)} ${modelLabel(search.carMake, search.carModel, lang)}`.trim()}
                     onChange={(e) => updateReqField("carType", e.target.value)}
                     className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
                   />
