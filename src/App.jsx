@@ -84,7 +84,7 @@ function modelLabel(makeValue, modelValue, lang) {
 
 const T = {
   ar: {
-    appName: "آمر", customerTab: "العميل", adminTab: "الإدارة", supplierTab: "المورد",
+    appName: "زتات", customerTab: "العميل", adminTab: "الإدارة", supplierTab: "المورد",
     supplierLoginTitle: "تسجيل دخول المورد", supplierLoginNote: "بيانات الدخول هذه تُعطى للمورد ليستخدمها في بوابته الخاصة",
     myProfileTab: "بياناتي", myProductsTab: "منتجاتي", addPartTab: "إضافة قطعة", myRequestsTab: "طلباتي",
     noMyProducts: "لا توجد قطع مسجَّلة باسمك حاليًا", requestTypeUpdatePart: "تعديل قطعة",
@@ -178,7 +178,7 @@ const T = {
     stages: ["قيد المراجعة", "تم التأكيد", "تم الشحن", "تم التسليم"],
   },
   en: {
-    appName: "Amer", customerTab: "Customer", adminTab: "Admin", supplierTab: "Supplier",
+    appName: "Zatat", customerTab: "Customer", adminTab: "Admin", supplierTab: "Supplier",
     supplierLoginTitle: "Supplier Login", supplierLoginNote: "These login details are given to the supplier for their own portal",
     myProfileTab: "My Profile", myProductsTab: "My Products", addPartTab: "Add Part", myRequestsTab: "My Requests",
     noMyProducts: "You don't have any listed parts yet", requestTypeUpdatePart: "Part update",
